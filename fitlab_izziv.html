@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fit Lab — Trening</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0e;
+    --surface: #1a1a18;
+    --surface2: #232320;
+    --border: #2e2e2a;
+    --accent: #c8f060;
+    --accent2: #60f0a8;
+    --text: #f0ede6;
+    --text2: #b8b5a8;
+    --text3: #888070;
+    --red: #f06060;
+    --blue: #60c8f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 32px 16px 64px;
+  }
+
+  .wrap { max-width: 580px; margin: 0 auto; }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 24px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 0.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+
+  .tab.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200, 240, 96, 0.06);
+  }
+
+  /* Day selector */
+  .day-selector {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .day-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .day-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200, 240, 96, 0.06);
+  }
+
+  .day-btn.done {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(96, 240, 168, 0.06);
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+
+  .card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+  }
+
+  /* Exercise rows */
+  .exercise {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .exercise:last-child { border-bottom: none; }
+
+  .exercise.completed { opacity: 0.5; }
+
+  .ex-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 0.5px solid var(--border);
+    background: var(--surface2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    font-size: 13px;
+  }
+
+  .exercise.completed .ex-check {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0f0f0e;
+  }
+
+  .ex-body { flex: 1; }
+
+  .ex-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .ex-detail {
+    font-size: 12px;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .ex-mod {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin-bottom: 20px;
+  }
+
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .progress-label { color: var(--text2); }
+  .progress-val { color: var(--accent); font-family: 'DM Mono', monospace; }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* Timer */
+  .timer-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 12px;
+  }
+
+  .timer-icon { font-size: 16px; }
+
+  .timer-label {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .timer-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 50px;
+    text-align: right;
+  }
+
+  .timer-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #0f0f0e;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+  }
+
+  .timer-btn.stop {
+    background: var(--red);
+    color: white;
+  }
+
+  /* Finish btn */
+  .finish-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    background: var(--surface2);
+    color: var(--text3);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: not-allowed;
+    transition: all 0.3s;
+    margin-top: 4px;
+  }
+
+  .finish-btn.ready {
+    background: var(--accent);
+    color: #0f0f0e;
+    cursor: pointer;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+
+  /* Done state */
+  .done-card {
+    background: rgba(96, 240, 168, 0.06);
+    border: 0.5px solid var(--accent2);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  .done-card.show { display: block; }
+  .done-emoji { font-size: 48px; margin-bottom: 12px; }
+  .done-title { font-size: 20px; font-weight: 500; color: var(--accent2); margin-bottom: 6px; }
+  .done-sub { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* Warm up */
+  .warmup {
+    background: rgba(96, 200, 240, 0.05);
+    border: 0.5px solid rgba(96, 200, 240, 0.2);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .warmup-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--blue);
+    margin-bottom: 8px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .warmup-item {
+    font-size: 13px;
+    color: var(--text2);
+    padding: 3px 0;
+    display: flex;
+    gap: 8px;
+  }
+
+  .warmup-item::before {
+    content: '→';
+    color: var(--blue);
+    flex-shrink: 0;
+  }
+
+  .divider { height: 0.5px; background: var(--border); margin: 20px 0; }
+
+  .tip-box {
+    background: rgba(200, 240, 96, 0.05);
+    border: 0.5px solid rgba(200, 240, 96, 0.2);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+
+  .tip-box strong { color: var(--accent); }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo">Fit Lab — 14-dnevni reset</div>
+  <h1>Tvoji treningi</h1>
+  <p class="subtitle">Klikni na vajo ko jo dokončaš. Odmor med serijami: 60s.</p>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showWorkout('A')">💪 Trening A</div>
+    <div class="tab" onclick="showWorkout('B')">🔥 Trening B</div>
+  </div>
+
+  <!-- Workout A -->
+  <div id="workout-A">
+
+    <div class="warmup">
+      <div class="warmup-title">🔥 Ogrevanje — 5 min</div>
+      <div class="warmup-item">20x jumping jack</div>
+      <div class="warmup-item">10x kroženje bokov</div>
+      <div class="warmup-item">10x počep brez uteži</div>
+      <div class="warmup-item">10x leg swing naprej/nazaj</div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">Napredek treninga</span>
+        <span class="progress-val" id="prog-A">0 / 6</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="fill-A" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Blok 1 — Moč nog</div>
+
+      <div class="exercise" onclick="toggle(this, 'A')" data-id="a1">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Počep</div>
+          <div class="ex-detail" id="reps-a1">3 × 10 ponovitev</div>
+          <div class="ex-mod">Modificirano: počep do stola (touch & go)</div>
+        </div>
+      </div>
+
+      <div class="exercise" onclick="toggle(this, 'A')" data-id="a2">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Izpadni korak</div>
+          <div class="ex-detail" id="reps-a2">3 × 8 ponovitev / noga</div>
+          <div class="ex-mod">Modificirano: krajši korak, drži stol za ravnotežje</div>
+        </div>
+      </div>
+
+      <div class="exercise" onclick="toggle(this, 'A')" data-id="a3">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Glute bridge</div>
+          <div class="ex-detail" id="reps-a3">3 × 12 ponovitev</div>
+          <div class="ex-mod">Modificirano: dvigni počasneje, drži zgoraj 2s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Blok 2 — Core</div>
+
+      <div class="exercise" onclick="toggle(this, 'A')" data-id="a4">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Plank</div>
+          <div class="ex-detail" id="reps-a4">3 × 30 sekund</div>
+          <div class="ex-mod">Modificirano: kolena na tleh</div>
+        </div>
+      </div>
+
+      <div class="exercise" onclick="toggle(this, 'A')" data-id="a5">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Dead bug</div>
+          <div class="ex-detail" id="reps-a5">3 × 8 ponovitev / stran</div>
+          <div class="ex-mod">Počasi, kontrolirano — dihaj ven med spuščanjem</div>
+        </div>
+      </div>
+
+      <div class="exercise" onclick="toggle(this, 'A')" data-id="a6">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Mountain climber</div>
+          <div class="ex-detail" id="reps-a6">3 × 15 ponovitev</div>
+          <div class="ex-mod">Modificirano: počasni mountain climber, ena noga naenkrat</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">⏱ Odmor med serijami</div>
+      <div class="timer-wrap">
+        <span class="timer-icon">⏳</span>
+        <span class="timer-label">Odmor</span>
+        <span class="timer-val" id="timer-A">60s</span>
+        <button class="timer-btn" id="timer-btn-A" onclick="startTimer('A')">Start</button>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <strong>Dan 5 napredek:</strong> +2 ponovitvi → Počep 3×12, Izpadni korak 3×10, Glute bridge 3×14<br>
+      <strong>Dan 8 napredek:</strong> +1 serija → vse vaje 4×12<br>
+      <strong>Dan 10 napredek:</strong> odmor skrajšaj na 45s namesto 60s<br>
+      <strong>Dan 12 napredek:</strong> vse serije brez pavze med njimi
+    </div>
+
+    <div class="done-card" id="done-A">
+      <div class="done-emoji">🏆</div>
+      <div class="done-title">Trening A dokončan!</div>
+      <div class="done-sub">Napiši v #14-dnevni-reset na Discordu:<br>"Dan X done 💪"</div>
+    </div>
+
+    <button class="finish-btn" id="finish-A" onclick="finishWorkout('A')">Dokončaj trening</button>
+  </div>
+
+  <!-- Workout B -->
+  <div id="workout-B" style="display:none">
+
+    <div class="warmup">
+      <div class="warmup-title">🔥 Ogrevanje — 5 min</div>
+      <div class="warmup-item">10x kroženje ramen</div>
+      <div class="warmup-item">10x arm circles naprej/nazaj</div>
+      <div class="warmup-item">10x cat-cow</div>
+      <div class="warmup-item">20x jumping jack</div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">Napredek treninga</span>
+        <span class="progress-val" id="prog-B">0 / 6</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="fill-B" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Blok 1 — Zgornji del</div>
+
+      <div class="exercise" onclick="toggle(this, 'B')" data-id="b1">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Skleca</div>
+          <div class="ex-detail" id="reps-b1">3 × 8 ponovitev</div>
+          <div class="ex-mod">Modificirano: kolena na tleh</div>
+        </div>
+      </div>
+
+      <div class="exercise" onclick="toggle(this, 'B')" data-id="b2">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Pike push up</div>
+          <div class="ex-detail" id="reps-b2">3 × 8 ponovitev</div>
+          <div class="ex-mod">Modificirano: hold pozicija 20s namesto ponovitev</div>
+        </div>
+      </div>
+
+      <div class="exercise" onclick="toggle(this, 'B')" data-id="b3">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Dips na stolu</div>
+          <div class="ex-detail" id="reps-b3">3 × 10 ponovitev</div>
+          <div class="ex-mod">Nogi pokrčeni za lažjo verzijo</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Blok 2 — Core</div>
+
+      <div class="exercise" onclick="toggle(this, 'B')" data-id="b4">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Bočni plank</div>
+          <div class="ex-detail" id="reps-b4">3 × 25 sekund / stran</div>
+          <div class="ex-mod">Modificirano: koleno na tleh</div>
+        </div>
+      </div>
+
+      <div class="exercise" onclick="toggle(this, 'B')" data-id="b5">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Bird dog</div>
+          <div class="ex-detail" id="reps-b5">3 × 10 ponovitev / stran</div>
+          <div class="ex-mod">Počasi — drži 2s ko si iztegnjen</div>
+        </div>
+      </div>
+
+      <div class="exercise" onclick="toggle(this, 'B')" data-id="b6">
+        <div class="ex-check"></div>
+        <div class="ex-body">
+          <div class="ex-name">Hollow hold</div>
+          <div class="ex-detail" id="reps-b6">3 × 20 sekund</div>
+          <div class="ex-mod">Modificirano: noge višje, roke ob telesu</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">⏱ Odmor med serijami</div>
+      <div class="timer-wrap">
+        <span class="timer-icon">⏳</span>
+        <span class="timer-label">Odmor</span>
+        <span class="timer-val" id="timer-B">60s</span>
+        <button class="timer-btn" id="timer-btn-B" onclick="startTimer('B')">Start</button>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <strong>Dan 3 napredek:</strong> osnova → Skleca 3×8, Pike push up 3×8, Dips 3×10<br>
+      <strong>Dan 8 napredek:</strong> +2 ponovitvi → Skleca 3×10, Pike push up 3×10, Dips 3×12<br>
+      <strong>Dan 10 napredek:</strong> +1 serija → vse vaje 4×10<br>
+      <strong>Dan 12 napredek:</strong> odmor skrajšaj na 45s + vse serije brez pavze
+    </div>
+
+    <div class="done-card" id="done-B">
+      <div class="done-emoji">🏆</div>
+      <div class="done-title">Trening B dokončan!</div>
+      <div class="done-sub">Napiši v #14-dnevni-reset na Discordu:<br>"Dan X done 💪"</div>
+    </div>
+
+    <button class="finish-btn" id="finish-B" onclick="finishWorkout('B')">Dokončaj trening</button>
+  </div>
+
+</div>
+
+<script>
+  const completed = { A: new Set(), B: new Set() };
+  const totals = { A: 6, B: 6 };
+  const timers = { A: null, B: null };
+  const timerVals = { A: 60, B: 60 };
+
+  function showWorkout(w) {
+    document.getElementById('workout-A').style.display = w === 'A' ? 'block' : 'none';
+    document.getElementById('workout-B').style.display = w === 'B' ? 'block' : 'none';
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && w === 'A') || (i === 1 && w === 'B'));
+    });
+  }
+
+  function toggle(el, workout) {
+    const id = el.dataset.id;
+    if (completed[workout].has(id)) {
+      completed[workout].delete(id);
+      el.classList.remove('completed');
+      el.querySelector('.ex-check').textContent = '';
+    } else {
+      completed[workout].add(id);
+      el.classList.add('completed');
+      el.querySelector('.ex-check').textContent = '✓';
+    }
+    updateProgress(workout);
+  }
+
+  function updateProgress(w) {
+    const done = completed[w].size;
+    const total = totals[w];
+    const pct = Math.round(done / total * 100);
+    document.getElementById('prog-' + w).textContent = done + ' / ' + total;
+    document.getElementById('fill-' + w).style.width = pct + '%';
+    const btn = document.getElementById('finish-' + w);
+    if (done === total) {
+      btn.classList.add('ready');
+      btn.textContent = 'Dokončaj trening ✓';
+    } else {
+      btn.classList.remove('ready');
+      btn.textContent = 'Dokončaj trening (' + (total - done) + ' vaj ostane)';
+    }
+  }
+
+  function finishWorkout(w) {
+    if (completed[w].size < totals[w]) return;
+    document.getElementById('done-' + w).classList.add('show');
+    document.getElementById('finish-' + w).style.display = 'none';
+    document.getElementById('done-' + w).scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function startTimer(w) {
+    if (timers[w]) {
+      clearInterval(timers[w]);
+      timers[w] = null;
+      timerVals[w] = 60;
+      document.getElementById('timer-' + w).textContent = '60s';
+      document.getElementById('timer-btn-' + w).textContent = 'Start';
+      document.getElementById('timer-btn-' + w).classList.remove('stop');
+      return;
+    }
+    document.getElementById('timer-btn-' + w).textContent = 'Reset';
+    document.getElementById('timer-btn-' + w).classList.add('stop');
+    timers[w] = setInterval(() => {
+      timerVals[w]--;
+      document.getElementById('timer-' + w).textContent = timerVals[w] + 's';
+      if (timerVals[w] <= 0) {
+        clearInterval(timers[w]);
+        timers[w] = null;
+        timerVals[w] = 60;
+        document.getElementById('timer-' + w).textContent = '✓ Pojdi!';
+        document.getElementById('timer-btn-' + w).textContent = 'Start';
+        document.getElementById('timer-btn-' + w).classList.remove('stop');
+      }
+    }, 1000);
+  }
+</script>
+</body>
+</html>
+<style>
+@media (max-width: 400px) {
+  h1 { font-size: 22px; }
+  .card { padding: 14px; }
+  .tab { font-size: 12px; padding: 8px; }
+  .ex-name { font-size: 13px; }
+  .ex-detail { font-size: 11px; }
+  .ex-mod { font-size: 10px; }
+}
+</style>
