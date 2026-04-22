@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fit Lab — Program builder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f0e;--s1:#1a1a18;--s2:#232320;--b:#2e2e2a;
+  --ac:#c8f060;--ac2:#60f0a8;--txt:#f0ede6;--t2:#b8b5a8;--t3:#888070;
+  --blue:#60c8f0;--coral:#f09060;--red:#f06060;--purple:#a080f0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 80px}
+.wrap{max-width:520px;margin:0 auto}
+.logo{font-family:'DM Mono',monospace;font-size:11px;color:var(--ac);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ac);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:24px;font-weight:500;margin-bottom:6px}
+h1 span{color:var(--ac)}
+.sub{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.5}
+.card{background:var(--s1);border:.5px solid var(--b);border-radius:14px;padding:18px;margin-bottom:10px}
+.card-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:12px}
+.seg{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap}
+.seg-btn{flex:1;min-width:60px;padding:10px 6px;border-radius:8px;border:.5px solid var(--b);background:var(--s2);color:var(--t2);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:all .15s;user-select:none;line-height:1.3}
+.seg-btn.on{border-color:var(--ac);color:var(--ac);background:rgba(200,240,96,.08)}
+.field{margin-bottom:14px}
+label{display:block;font-size:12px;color:var(--t2);margin-bottom:6px}
+input[type=number]{width:100%;background:var(--s2);border:.5px solid var(--b);border-radius:8px;padding:10px 12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--txt);outline:none;transition:border-color .15s;-moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+input:focus{border-color:var(--ac)}
+.btn-primary{width:100%;padding:14px;border-radius:10px;border:none;background:var(--ac);color:#0f0f0e;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;margin-top:4px}
+.btn-primary:hover{background:#d4f570;transform:translateY(-1px)}
+.err{background:rgba(240,96,96,.08);border:.5px solid rgba(240,96,96,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:10px;display:none}
+
+/* Program output */
+#output{display:none}
+.program-header{background:var(--s1);border:.5px solid var(--b);border-radius:14px;padding:18px;margin-bottom:10px}
+.program-title{font-size:20px;font-weight:500;color:var(--txt);margin-bottom:4px}
+.program-sub{font-size:13px;color:var(--t2);margin-bottom:14px}
+.program-stats{display:flex;gap:8px}
+.pstat{flex:1;background:var(--s2);border-radius:8px;padding:10px;text-align:center}
+.pstat-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--ac);line-height:1;margin-bottom:3px}
+.pstat-label{font-size:10px;color:var(--t3)}
+
+/* Day tabs */
+.day-tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.day-tab{padding:8px 12px;border-radius:8px;border:.5px solid var(--b);background:var(--s1);color:var(--t2);font-size:12px;cursor:pointer;transition:all .15s;font-weight:500}
+.day-tab.active{border-color:var(--ac);color:var(--ac);background:rgba(200,240,96,.08)}
+.day-tab.rest-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(96,200,240,.08)}
+
+/* Workout card */
+.workout-card{background:var(--s1);border:.5px solid var(--b);border-radius:14px;overflow:hidden;margin-bottom:10px}
+.workout-header{padding:14px 16px;border-bottom:.5px solid var(--b);display:flex;align-items:center;gap:12px}
+.workout-icon{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.wi-train{background:rgba(200,240,96,.1)}
+.wi-rest{background:rgba(96,200,240,.1)}
+.workout-name{font-size:15px;font-weight:500;color:var(--txt)}
+.workout-desc{font-size:12px;color:var(--t2);margin-top:2px}
+
+/* Exercise table */
+.ex-table{width:100%;border-collapse:collapse}
+.ex-table th{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:10px 14px;text-align:left;border-bottom:.5px solid var(--b);font-weight:400}
+.ex-table td{padding:11px 14px;border-bottom:.5px solid var(--b);font-size:13px;vertical-align:top}
+.ex-table tr:last-child td{border-bottom:none}
+.ex-name{color:var(--txt);font-weight:500;margin-bottom:2px}
+.ex-muscles{font-size:11px;color:var(--t3)}
+.ex-sets{font-family:'DM Mono',monospace;color:var(--ac);font-size:13px;white-space:nowrap}
+.ex-rest{font-family:'DM Mono',monospace;color:var(--t3);font-size:12px}
+
+/* Rest day */
+.rest-content{padding:16px}
+.rest-item{display:flex;gap:10px;padding:9px 0;border-bottom:.5px solid var(--b);font-size:13px;color:var(--t2);align-items:flex-start}
+.rest-item:last-child{border-bottom:none}
+.rest-icon{font-size:16px;flex-shrink:0}
+
+/* Progression box */
+.prog-box{background:rgba(200,240,96,.05);border:.5px solid rgba(200,240,96,.2);border-radius:10px;padding:14px;margin-bottom:10px}
+.prog-title{font-size:12px;font-weight:500;color:var(--ac);margin-bottom:8px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
+.prog-row{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:.5px solid rgba(200,240,96,.1);font-size:12px;color:var(--t2)}
+.prog-row:last-child{border-bottom:none}
+.prog-week{font-family:'DM Mono',monospace;color:var(--ac);font-size:11px;min-width:50px;flex-shrink:0;margin-top:1px}
+
+/* Tip */
+.tip{background:var(--s1);border:.5px solid var(--b);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:10px}
+.tip strong{color:var(--ac)}
+
+.divider{height:.5px;background:var(--b);margin:14px 0}
+.reset-link{text-align:center;font-size:11px;color:var(--t3);cursor:pointer;margin-top:16px;font-family:'DM Mono',monospace}
+.reset-link:hover{color:var(--t2)}
+
+@media(max-width:380px){.seg-btn{font-size:11px}.ex-table th,.ex-table td{padding:8px 10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- INPUT -->
+<div id="input-screen">
+  <div class="logo"><div class="dot"></div>Fit Lab — Program builder</div>
+  <h1>Sestavi <span>tvoj program</span></h1>
+  <p class="sub">Odgovori na 3 vprašanja — dobiš personaliziran program za fitnes.</p>
+
+  <div class="card">
+    <div class="card-label">Spol</div>
+    <div class="seg">
+      <div class="seg-btn" onclick="pickVal('gender','male',this)">Moški</div>
+      <div class="seg-btn" onclick="pickVal('gender','female',this)">Ženska</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Koliko dni na teden boš treniral?</div>
+    <div class="seg" id="days-seg">
+      <div class="seg-btn" onclick="pickDays(2,this)">2 dni</div>
+      <div class="seg-btn" onclick="pickDays(3,this)">3 dni</div>
+      <div class="seg-btn" onclick="pickDays(4,this)">4 dni</div>
+      <div class="seg-btn" onclick="pickDays(5,this)">5 dni</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Cilj</div>
+    <div class="seg">
+      <div class="seg-btn" onclick="pickVal('goal','hypertrophy',this)">Mišična masa</div>
+      <div class="seg-btn" onclick="pickVal('goal','weightloss',this)">Hujšanje</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Izkušnje v fitnesu</div>
+    <div class="seg">
+      <div class="seg-btn" onclick="pickVal('level','beginner',this)">Začetnik<br><span style="font-size:10px;opacity:.7">0–1 leto</span></div>
+      <div class="seg-btn" onclick="pickVal('level','intermediate',this)">Vmesni<br><span style="font-size:10px;opacity:.7">1–3 leta</span></div>
+    </div>
+  </div>
+
+  <div class="err" id="input-err">Prosim izberi vse možnosti.</div>
+  <button class="btn-primary" onclick="buildProgram()">Sestavi moj program →</button>
+</div>
+
+<!-- OUTPUT -->
+<div id="output">
+  <div class="logo"><div class="dot"></div>Fit Lab — Program builder</div>
+  <h1>Tvoj <span id="out-split-name">program</span></h1>
+  <p class="sub" id="out-sub"></p>
+
+  <div class="program-header">
+    <div class="program-title" id="out-title"></div>
+    <div class="program-sub" id="out-desc"></div>
+    <div class="program-stats" id="out-stats"></div>
+  </div>
+
+  <div class="day-tabs" id="day-tabs"></div>
+  <div id="day-content"></div>
+
+  <div class="prog-box">
+    <div class="prog-title">Kako napreduješ — progresija</div>
+    <div id="prog-rows"></div>
+  </div>
+
+  <div class="tip" id="out-tip"></div>
+
+  <button class="btn-primary" onclick="resetBuilder()" style="background:var(--s2);color:var(--t2);border:.5px solid var(--b)">Sestavi nov program</button>
+</div>
+
+</div>
+
+<script>
+const state = { days: null, goal: null, level: null, gender: null };
+
+function pickDays(n, el) {
+  state.days = n;
+  document.querySelectorAll('#days-seg .seg-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function pickVal(key, val, el) {
+  state[key] = val;
+  el.closest('.seg').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// Exercise database
+const exercises = {
+  // Chest
+  chestPress: { name: 'Chest press (mašina)', muscles: 'Prsa, triceps, ramena', category: 'push' },
+  benchPress: { name: 'Bench press', muscles: 'Prsa, triceps, ramena', category: 'push' },
+  inclineDB: { name: 'Incline dumbbell press', muscles: 'Zgornja prsa, ramena', category: 'push' },
+  cableFly: { name: 'Cable fly', muscles: 'Prsa', category: 'push' },
+  // Back
+  latPulldown: { name: 'Lat pulldown', muscles: 'Latissimus, biceps', category: 'pull' },
+  supinatedPullUp: { name: 'Supinated pull up', muscles: 'Latissimus, biceps (podprijemalno)', category: 'pull' },
+  supinatedLatPulldown: { name: 'Supinated lat pulldown', muscles: 'Latissimus, biceps (podprijemalno)', category: 'pull' },
+  machineRow: { name: 'Machine row', muscles: 'Srednji hrbet, latissimus, biceps', category: 'pull' },
+  tBarRow: { name: 'T-bar row', muscles: 'Srednji hrbet, latissimus, biceps', category: 'pull' },
+  seatedRow: { name: 'Seated cable row', muscles: 'Srednji hrbet, biceps', category: 'pull' },
+  // mrtvi dvig je izključen — preveč tehničen za začetnike
+  romanianDL: { name: 'Romanian deadlift', muscles: 'Zadnje stegno, zadnjica', category: 'legs' },
+  // Shoulders
+  ohp: { name: 'Overhead press', muscles: 'Ramena, triceps', category: 'push' },
+  lateralRaise: { name: 'Lateral raise', muscles: 'Stranska ramena', category: 'push' },
+  facePull: { name: 'Face pull', muscles: 'Zadnja ramena, rotatorji', category: 'pull' },
+  // Legs
+  squat: { name: 'Počep', muscles: 'Kvadricepsi, zadnjica', category: 'legs' },
+  legPress: { name: 'Leg press', muscles: 'Kvadricepsi, zadnjica', category: 'legs' },
+  legCurl: { name: 'Leg curl', muscles: 'Zadnje stegno', category: 'legs' },
+  legExtension: { name: 'Leg extension', muscles: 'Kvadricepsi', category: 'legs' },
+  calfRaise: { name: 'Calf raise', muscles: 'Telečja mišica', category: 'legs' },
+  hipThrust: { name: 'Hip thrust', muscles: 'Zadnjica, zadnje stegno', category: 'legs' },
+  // Arms
+  bicepCurl: { name: 'Bicep curl', muscles: 'Biceps', category: 'pull' },
+  tricepExtension: { name: 'Tricep extension', muscles: 'Triceps', category: 'push' },
+  tricepPushdown: { name: 'Tricep pushdown', muscles: 'Triceps', category: 'push' },
+  hammerCurl: { name: 'Hammer curl', muscles: 'Biceps, brahialis', category: 'pull' },
+  // Glutes & Posterior chain
+  hipThrustBar: { name: 'Hip thrust', muscles: 'Zadnjica, zadnje stegno', category: 'legs' },
+  sumoSquat: { name: 'Sumo počep', muscles: 'Zadnjica, notranje stegno, kvadricepsi', category: 'legs' },
+  bulgarianSplitSquat: { name: 'Bulgarian split squat', muscles: 'Kvadricepsi, zadnjica, stabilizatorji', category: 'legs' },
+  stepUp: { name: 'Step up z utežmi', muscles: 'Kvadricepsi, zadnjica', category: 'legs' },
+  adductorMachine: { name: 'Adductor machine', muscles: 'Notranje stegno', category: 'legs' },
+  abductorMachine: { name: 'Abductor machine', muscles: 'Stranska zadnjica, gluteus medius', category: 'legs' },
+  rearDeltFly: { name: 'Rear delt fly', muscles: 'Zadnja ramena, trapezius', category: 'push' },
+  // Core
+  plank: { name: 'Plank', muscles: 'Core, stabilizatorji', category: 'core' },
+  cableCrunch: { name: 'Cable crunch', muscles: 'Trebušne mišice', category: 'core' },
+};
+
+function getSets(isLateralRaise) {
+  return isLateralRaise ? '3 × 6–12' : '2 × 6–12';
+}
+
+function isPlank(exKey) {
+  return exKey === 'plank' || exKey === 'cableCrunch';
+}
+
+function getRest() {
+  return '60–90s';
+}
+
+// Program templates
+function getProgram(days, goal, level, gender) {
+  const s = (ex, isLateralRaise = false) => {
+    const isCore = ex === 'plank';
+    return {
+      ...exercises[ex],
+      sets: isCore ? '2 × 60s' : getSets(isLateralRaise),
+      rest: isCore ? '60s' : getRest()
+    };
+  };
+
+  const restDay = { type: 'rest', name: 'Počitek' };
+
+  if (days === 2) {
+    if (gender === 'female') {
+      return {
+        split: 'Full Body',
+        desc: '2 dni na teden — fokus zadnjica in noge',
+        frequency: '2x / teden',
+        days: [
+          {
+            type: 'train', label: 'Trening A', name: 'Full Body A — glutes, hamstrings & upper',
+            exercises: [
+              { ...exercises['hipThrustBar'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['romanianDL'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['abductorMachine'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['legCurl'], sets: '3 × 8–12', rest: '60s' },
+              { ...exercises['latPulldown'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['lateralRaise'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['plank'], sets: '2 × 60s', rest: '60s' },
+            ]
+          },
+          restDay, restDay,
+          {
+            type: 'train', label: 'Trening B', name: 'Full Body B — quads, glutes & upper',
+            exercises: [
+              { ...exercises['squat'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['bulgarianSplitSquat'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['hipThrust'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['legExtension'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['latPulldown'], sets: '3 × 6–12', rest: '60–90s' },
+              { ...exercises['ohp'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['lateralRaise'], sets: '2 × 8–12', rest: '60s' },
+            ]
+          },
+          restDay, restDay, restDay
+        ]
+      };
+    }
+    return {
+      split: 'Full Body',
+      desc: '2 dni na teden — vsak trening zadane vse mišične skupine',
+      frequency: '2x / teden',
+      days: [
+        {
+          type: 'train', label: 'Trening A', name: 'Full Body A — fokus zgornji del',
+          exercises: [
+            s('benchPress'), s('latPulldown'), s('ohp'),
+            s('squat'), s('romanianDL'), s('lateralRaise', true), s('plank')
+          ]
+        },
+        restDay,
+        restDay,
+        {
+          type: 'train', label: 'Trening B', name: 'Full Body B — fokus spodnji del',
+          exercises: [
+            { ...exercises['legPress'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['legExtension'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['legCurl'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['inclineDB'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['seatedRow'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['bicepCurl'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['cableCrunch'], sets: '3 × 8–12', rest: '60s' },
+          ]
+        },
+        restDay, restDay, restDay
+      ]
+    };
+  }
+
+  if (days === 3) {
+    if (gender === 'female') {
+      return {
+        split: 'Full Body',
+        desc: '3 dni na teden — fokus zadnjica, noge in zgornji del',
+        frequency: '3x / teden',
+        days: [
+          {
+            type: 'train', label: 'Trening A', name: 'Full Body A — glutes & hamstrings fokus',
+            exercises: [
+              { ...exercises['hipThrustBar'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['romanianDL'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['abductorMachine'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['legCurl'], sets: '3 × 8–12', rest: '60s' },
+              { ...exercises['seatedRow'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['lateralRaise'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['plank'], sets: '2 × 60s', rest: '60s' },
+            ]
+          },
+          restDay,
+          {
+            type: 'train', label: 'Trening B', name: 'Full Body B — upper fokus',
+            exercises: [
+              { ...exercises['latPulldown'], sets: '3 × 6–12', rest: '60–90s' },
+              { ...exercises['benchPress'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['ohp'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['rearDeltFly'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['lateralRaise'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['squat'], sets: '3 × 6–12', rest: '60–90s' },
+              { ...exercises['legExtension'], sets: '2 × 8–12', rest: '60s' },
+            ]
+          },
+          restDay,
+          {
+            type: 'train', label: 'Trening C', name: 'Full Body C — glutes & hrbet fokus',
+            exercises: [
+              { ...exercises['hipThrustBar'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['stepUp'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['romanianDL'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['supinatedLatPulldown'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['seatedRow'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['lateralRaise'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['plank'], sets: '2 × 60s', rest: '60s' },
+            ]
+          },
+          restDay, restDay
+        ]
+      };
+    }
+    return {
+      split: 'Full Body',
+      desc: '3 dni na teden — vsaka mišična skupina 3x tedensko',
+      frequency: '3x / teden',
+      days: [
+        {
+          type: 'train', label: 'Trening A', name: 'Full Body A — fokus zgornji del',
+          exercises: [
+            { ...exercises['inclineDB'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['latPulldown'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['lateralRaise'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['squat'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['bicepCurl'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['tricepPushdown'], sets: '3 × 8–12', rest: '60s' },
+          ]
+        },
+        restDay,
+        {
+          type: 'train', label: 'Trening B', name: 'Full Body B — fokus spodnji del',
+          exercises: [
+            { ...exercises['tBarRow'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['benchPress'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['ohp'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['romanianDL'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['legCurl'], sets: '2 × 8–12', rest: '60s' },
+            { ...exercises['cableCrunch'], sets: '3 × 8–12', rest: '60s' },
+          ]
+        },
+        restDay,
+        {
+          type: 'train', label: 'Trening C', name: 'Full Body C — fokus zgornji del',
+          exercises: [
+            { ...exercises['chestPress'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['supinatedPullUp'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['rearDeltFly'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['legPress'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['bicepCurl'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['tricepExtension'], sets: '3 × 8–12', rest: '60s' },
+          ]
+        },
+        restDay, restDay
+      ]
+    };
+  }
+
+  if (days === 4) {
+    if (gender === 'female') {
+      return {
+        split: 'Lower / Upper',
+        desc: '4 dni na teden — 2x spodnji del, 2x zgornji del',
+        frequency: '4x / teden',
+        days: [
+          {
+            type: 'train', label: 'Lower A', name: 'Spodnji del A — glutes & hamstrings',
+            exercises: [
+              { ...exercises['hipThrustBar'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['romanianDL'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['legPress'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['abductorMachine'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['legCurl'], sets: '3 × 8–12', rest: '60s' },
+              { ...exercises['calfRaise'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['plank'], sets: '2 × 60s', rest: '60s' },
+            ]
+          },
+          {
+            type: 'train', label: 'Upper A', name: 'Zgornji del A — ramena, hrbet, prsa',
+            exercises: [
+              { ...exercises['seatedRow'], sets: '3 × 6–12', rest: '60–90s' },
+              { ...exercises['ohp'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['latPulldown'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['lateralRaise'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['rearDeltFly'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['benchPress'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['tricepPushdown'], sets: '2 × 8–12', rest: '60s' },
+            ]
+          },
+          restDay,
+          {
+            type: 'train', label: 'Lower B', name: 'Spodnji del B — quads & glutes',
+            exercises: [
+              { ...exercises['squat'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['hipThrust'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['legExtension'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['abductorMachine'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['legCurl'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['calfRaise'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['plank'], sets: '2 × 60s', rest: '60s' },
+            ]
+          },
+          {
+            type: 'train', label: 'Upper B', name: 'Zgornji del B — ramena, hrbet, prsa',
+            exercises: [
+              { ...exercises['supinatedLatPulldown'], sets: '3 × 6–12', rest: '60–90s' },
+              { ...exercises['ohp'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['seatedRow'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['lateralRaise'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['rearDeltFly'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['benchPress'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['bicepCurl'], sets: '2 × 8–12', rest: '60s' },
+            ]
+          },
+          restDay, restDay
+        ]
+      };
+    }
+    return {
+      split: 'Upper / Lower',
+      desc: '4 dni na teden — 2x zgornji del, 2x spodnji del',
+      frequency: '4x / teden',
+      days: [
+        {
+          type: 'train', label: 'Upper A', name: 'Zgornji del A — moč & baza',
+          exercises: [
+            { ...exercises['benchPress'], sets: '3 × 6–10', rest: '60–90s' },
+            { ...exercises['machineRow'], sets: '3 × 6–10', rest: '60–90s' },
+            { ...exercises['inclineDB'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['latPulldown'], sets: '2 × 6–12', rest: '60–90s' },
+            { ...exercises['lateralRaise'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['tricepPushdown'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['bicepCurl'], sets: '3 × 8–12', rest: '60s' },
+          ]
+        },
+        {
+          type: 'train', label: 'Lower A', name: 'Spodnji del A — quad fokus',
+          exercises: [
+            { ...exercises['squat'], sets: '3 × 6–10', rest: '60–90s' },
+            { ...exercises['romanianDL'], sets: '3 × 6–10', rest: '60–90s' },
+            { ...exercises['legExtension'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['legCurl'], sets: '2 × 8–12', rest: '60s' },
+            { ...exercises['calfRaise'], sets: '3 × 8–12', rest: '60s' },
+          ]
+        },
+        restDay,
+        {
+          type: 'train', label: 'Upper B', name: 'Zgornji del B',
+          exercises: [
+            { ...exercises['supinatedPullUp'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['inclineDB'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['tBarRow'], sets: '2 × 6–12', rest: '60–90s' },
+            { ...exercises['ohp'], sets: '2 × 6–12', rest: '60–90s' },
+            { ...exercises['rearDeltFly'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['bicepCurl'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['tricepPushdown'], sets: '3 × 8–12', rest: '60s' },
+          ]
+        },
+        {
+          type: 'train', label: 'Lower B', name: 'Spodnji del B — posterior fokus',
+          exercises: [
+            { ...exercises['romanianDL'], sets: '3 × 6–10', rest: '60–90s' },
+            { ...exercises['bulgarianSplitSquat'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['adductorMachine'], sets: '2 × 8–12', rest: '60s' },
+            { ...exercises['legCurl'], sets: '3 × 8–12', rest: '60s' },
+            { ...exercises['hipThrustBar'], sets: '3 × 6–12', rest: '60–90s' },
+            { ...exercises['calfRaise'], sets: '3 × 8–12', rest: '60s' },
+          ]
+        },
+        restDay, restDay
+      ]
+    };
+  }
+
+  if (days === 5) {
+    if (gender === 'female') {
+      return {
+        split: 'Push / Legs / Pull / Legs / Upper',
+        desc: '5 dni na teden — 2x noge, fokus zadnjica in ramena',
+        frequency: '5x / teden',
+        days: [
+          {
+            type: 'train', label: 'Push', name: 'Push — ramena, prsa, triceps',
+            exercises: [
+              { ...exercises['ohp'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['lateralRaise'], sets: '3 × 8–12', rest: '60s' },
+              { ...exercises['rearDeltFly'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['inclineDB'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['tricepPushdown'], sets: '2 × 8–12', rest: '60s' },
+            ]
+          },
+          {
+            type: 'train', label: 'Legs A', name: 'Legs A — glutes & hamstrings',
+            exercises: [
+              { ...exercises['hipThrustBar'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['romanianDL'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['abductorMachine'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['legCurl'], sets: '3 × 8–12', rest: '60s' },
+              { ...exercises['calfRaise'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['plank'], sets: '2 × 60s', rest: '60s' },
+            ]
+          },
+          {
+            type: 'train', label: 'Pull', name: 'Pull — hrbet, biceps',
+            exercises: [
+              { ...exercises['latPulldown'], sets: '3 × 6–12', rest: '60–90s' },
+              { ...exercises['seatedRow'], sets: '3 × 6–12', rest: '60–90s' },
+              { ...exercises['supinatedLatPulldown'], sets: '3 × 6–12', rest: '60–90s' },
+              { ...exercises['facePull'], sets: '3 × 8–12', rest: '60s' },
+              { ...exercises['bicepCurl'], sets: '3 × 8–12', rest: '60s' },
+            ]
+          },
+          restDay,
+          {
+            type: 'train', label: 'Legs B', name: 'Legs B — quads & glutes',
+            exercises: [
+              { ...exercises['squat'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['bulgarianSplitSquat'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['legExtension'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['hipThrust'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['legCurl'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['calfRaise'], sets: '2 × 8–12', rest: '60s' },
+            ]
+          },
+          {
+            type: 'train', label: 'Upper', name: 'Upper — zgornji del mix',
+            exercises: [
+              { ...exercises['supinatedLatPulldown'], sets: '3 × 6–12', rest: '60–90s' },
+              { ...exercises['ohp'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['lateralRaise'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['rearDeltFly'], sets: '2 × 8–12', rest: '60s' },
+              { ...exercises['benchPress'], sets: '2 × 6–12', rest: '60–90s' },
+              { ...exercises['bicepCurl'], sets: '2 × 8–12', rest: '60s' },
+            ]
+          },
+          restDay
+        ]
+      };
+    }
+    return {
+      split: 'Push / Pull / Legs',
+      desc: '5 dni na teden — vsaka mišična skupina 2x tedensko',
+      frequency: '5x / teden',
+      days: [
+        {
+          type: 'train', label: 'Push A', name: 'Push A — prsa, ramena, triceps',
+          exercises: [
+            s('benchPress', true), s('ohp', true),
+            s('inclineDB'), s('lateralRaise', true), s('cableFly'), s('tricepPushdown')
+          ]
+        },
+        {
+          type: 'train', label: 'Pull A', name: 'Pull A — hrbet, biceps',
+          exercises: [
+            s('romanianDL', true), s('latPulldown', true),
+            s('seatedRow'), s('facePull'), s('bicepCurl'), s('hammerCurl')
+          ]
+        },
+        {
+          type: 'train', label: 'Legs A', name: 'Legs A — noge, zadnjica',
+          exercises: [
+            s('squat', true), s('romanianDL', true),
+            s('legPress'), s('legCurl'), s('hipThrust'), s('calfRaise'), s('cableCrunch')
+          ]
+        },
+        restDay,
+        {
+          type: 'train', label: 'Push B', name: 'Push B — prsa, ramena, triceps',
+          exercises: [
+            s('inclineDB', true), s('ohp', true),
+            s('cableFly'), s('lateralRaise', true), s('benchPress'), s('tricepPushdown')
+          ]
+        },
+        {
+          type: 'train', label: 'Pull B', name: 'Pull B — hrbet, biceps',
+          exercises: [
+            s('latPulldown', true), s('seatedRow', true),
+            s('romanianDL'), s('facePull'), s('bicepCurl'), s('hammerCurl')
+          ]
+        },
+        restDay
+      ]
+    };
+  }
+}
+
+function getProgression(goal, gender) {
+  const isFemale = gender === 'female';
+  const base = [
+    { week: '1. Rep range', desc: 'Compound vaje (počep, hip thrust, bench, OHP, lat pulldown): 6–12 ponovitev. Izolacijske vaje (leg curl, lateral raises, rear delt, abductor): 8–12 ponovitev.' },
+    { week: '2. Kako napreduješ', desc: isFemale
+      ? 'Ko prideš do zgornje meje ponovitev — povečaj težo in začni znova pri spodnji meji. Primer: leg curl 2×12 → dodaj 2.5–5kg → začni pri 2×8.'
+      : 'Ko prideš do zgornje meje ponovitev — povečaj težo in začni znova pri spodnji meji. Primer: bench 2×12 → dodaj 5kg → začni pri 2×6.' },
+    { week: '3. Koliko povečaš', desc: 'Zgornji del (bench, OHP, lat pulldown): +5kg. Spodnji del (počep, hip thrust, romanian DL): +5–10kg. Izolacijske vaje: +2.5–5kg.' },
+    { week: '4. Kdaj ne povečaš', desc: isFemale
+      ? 'Če nisi zmogla vseh ponovitev z novo težo — ostani pri isti teži. Ko dosežeš vse ponovitve čisto, napreduj.'
+      : 'Če nisi zmogel vseh ponovitev z novo težo — ostani pri isti teži. Ko dosežeš vse ponovitve čisto, napreduj.' },
+  ];
+  if (goal === 'weightloss') {
+    base.push({ week: 'Kardio', desc: 'Po vsakem treningu 10–15 min kardio (hodna steza, kolo). Ne pred — po treningu.' });
+  }
+  return base;
+}
+
+function getTip(goal, gender) {
+  const warmup = `<strong>🔥 Ogrevanje pred vsakim treningom:</strong> 2–3 serije z lažjo težo (50-60% delovne teže) pri prvih vajah. Ne preskoči — prepreči poškodbe in izboljša trening.`;
+  const isFemaleT = gender === 'female';
+  const tips = {
+    strength: `${warmup}<br><br><strong>💡 Za moč:</strong> Tehnika je vse. Raje manj teže s perfektno tehniko kot več teže z napako. Napreduj${isFemaleT ? 'i' : ''} samo ko so vse ponovitve čiste in kontrolirane.`,
+    hypertrophy: `${warmup}<br><br><strong>💡 Za mišično maso:</strong> Čuti${isFemaleT ? '' : ''} mišico ki jo delaš — mind-muscle connection. Počasen spust (2–3 sekunde) je ključen za rast. Zadnja ponovitev mora biti zahtevna ampak ne do odpovedi.`,
+    weightloss: `${warmup}<br><br><strong>💡 Za hujšanje:</strong> Trening ohranja mišice med hujšanjem. Po vsakem treningu 10–15 min kardio — hodna steza ali kolo. Kalorijski deficit + trening = pravo preoblikovanje telesa.`,
+  };
+  return tips[goal];
+}
+
+let currentProgram = null;
+let activeDay = 0;
+
+function buildProgram() {
+  const err = document.getElementById('input-err');
+  if (!state.days || !state.goal || !state.level || !state.gender) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+
+  currentProgram = getProgram(state.days, state.goal, state.level, state.gender);
+
+  document.getElementById('out-split-name').textContent = currentProgram.split;
+  document.getElementById('out-sub').textContent = currentProgram.desc;
+  document.getElementById('out-title').textContent = `${currentProgram.split} — ${state.days} dni / teden`;
+  document.getElementById('out-desc').textContent = currentProgram.desc;
+
+  // Stats
+  const trainDays = currentProgram.days.filter(d => d.type === 'train').length;
+  document.getElementById('out-stats').innerHTML = `
+    <div class="pstat"><div class="pstat-num">${trainDays}</div><div class="pstat-label">treningi/teden</div></div>
+    <div class="pstat"><div class="pstat-num">${7 - trainDays}</div><div class="pstat-label">počitek</div></div>
+    <div class="pstat"><div class="pstat-num">${currentProgram.days.find(d=>d.type==='train')?.exercises?.length || 0}</div><div class="pstat-label">vaj/trening</div></div>
+  `;
+
+  // Tabs
+  const dayNames = ['Pon','Tor','Sre','Čet','Pet','Sob','Ned'];
+  const tabs = document.getElementById('day-tabs');
+  tabs.innerHTML = '';
+  currentProgram.days.forEach((day, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'day-tab' + (day.type === 'rest' ? ' rest-tab' : '') + (i === 0 ? ' active' : '');
+    tab.textContent = dayNames[i];
+    tab.onclick = () => selectDay(i, tab);
+    tabs.appendChild(tab);
+  });
+
+  // Progression
+  const progRows = getProgression(state.goal, state.gender);
+  document.getElementById('prog-rows').innerHTML = progRows.map(p => `
+    <div class="prog-row">
+      <span class="prog-week">${p.week}</span>
+      <span>${p.desc}</span>
+    </div>
+  `).join('');
+
+  // Tip
+  document.getElementById('out-tip').innerHTML = getTip(state.goal, state.gender);
+
+  activeDay = 0;
+  renderDay(0);
+
+  document.getElementById('input-screen').style.display = 'none';
+  document.getElementById('output').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function selectDay(i, tab) {
+  activeDay = i;
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  renderDay(i);
+}
+
+function renderDay(i) {
+  const day = currentProgram.days[i];
+  const content = document.getElementById('day-content');
+
+  if (day.type === 'rest') {
+    content.innerHTML = `
+      <div class="workout-card">
+        <div class="workout-header">
+          <div class="workout-icon wi-rest">😴</div>
+          <div>
+            <div class="workout-name">Počitek</div>
+            <div class="workout-desc">Telo raste med počitkom, ne med treningom</div>
+          </div>
+        </div>
+        <div class="rest-content">
+          <div class="rest-item"><span class="rest-icon">🚶</span><span>10–15 min lahke hoje za aktivno regeneracijo</span></div>
+          <div class="rest-item"><span class="rest-icon">🧘</span><span>10 min stretchinga — posebej mišice od zadnjega treninga</span></div>
+          <div class="rest-item"><span class="rest-icon">💤</span><span>Vsaj 8h spanja nocoj — tam se dogaja rast</span></div>
+          <div class="rest-item"><span class="rest-icon">💧</span><span>2L+ vode čez dan</span></div>
+          <div class="rest-item"><span class="rest-icon">🥩</span><span>Ohrani vnos beljakovin — telo jih potrebuje za obnovo</span></div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const exRows = day.exercises.map(ex => `
+    <tr>
+      <td>
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-muscles">${ex.muscles}</div>
+      </td>
+      <td class="ex-sets">${ex.sets}</td>
+      <td class="ex-rest">${ex.rest}</td>
+    </tr>
+  `).join('');
+
+  content.innerHTML = `
+    <div class="workout-card">
+      <div class="workout-header">
+        <div class="workout-icon wi-train">💪</div>
+        <div>
+          <div class="workout-name">${day.name}</div>
+          <div class="workout-desc">${day.exercises.length} vaj · ${state.goal === 'strength' ? 'fokus na moč' : state.goal === 'hypertrophy' ? 'fokus na mišično maso' : 'fokus na preoblikovanje'}</div>
+        </div>
+      </div>
+      <table class="ex-table">
+        <thead>
+          <tr>
+            <th>Vaja</th>
+            <th>Serije</th>
+            <th>Odmor</th>
+          </tr>
+        </thead>
+        <tbody>${exRows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function resetBuilder() {
+  document.getElementById('output').style.display = 'none';
+  document.getElementById('input-screen').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
