@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fit Lab — Kalkulator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0e;
+    --surface: #1a1a18;
+    --surface2: #232320;
+    --border: #2e2e2a;
+    --accent: #c8f060;
+    --accent2: #60f0a8;
+    --text: #f0ede6;
+    --text2: #b8b5a8;
+    --text3: #888070;
+    --red: #f06060;
+    --blue: #60c8f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 32px 16px 64px;
+  }
+
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .header {
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 16px;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 6px;
+    font-weight: 400;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  input[type="number"] {
+    flex: 1;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  input[type="number"]:focus {
+    border-color: var(--accent);
+  }
+
+  .unit {
+    font-size: 12px;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    min-width: 24px;
+  }
+
+  .gender-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .gender-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 0.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .gender-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200, 240, 96, 0.06);
+  }
+
+  .select-field {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a5a50' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+
+  .select-field:focus { border-color: var(--accent); }
+
+  .goal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .goal-btn {
+    padding: 10px 8px;
+    border-radius: 8px;
+    border: 0.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .goal-btn.active-deficit {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200, 240, 96, 0.06);
+  }
+
+  .goal-btn.active-maintain {
+    border-color: var(--blue);
+    color: var(--blue);
+    background: rgba(96, 200, 240, 0.06);
+  }
+
+  .goal-btn.active-surplus {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(96, 240, 168, 0.06);
+  }
+
+  .calc-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: #0f0f0e;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.02em;
+    margin-top: 4px;
+  }
+
+  .calc-btn:hover {
+    background: #d4f570;
+    transform: translateY(-1px);
+  }
+
+  .calc-btn:active { transform: translateY(0); }
+
+  .results {
+    display: none;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .results.show { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .results-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+
+  .results-line {
+    flex: 1;
+    height: 0.5px;
+    background: var(--border);
+  }
+
+  .big-number {
+    text-align: center;
+    padding: 20px 0 16px;
+    border-bottom: 0.5px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .big-label {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 4px;
+  }
+
+  .big-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .big-unit {
+    font-size: 12px;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .stat-box {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 14px;
+    border: 0.5px solid var(--border);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .stat-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+  }
+
+  .stat-unit {
+    font-size: 11px;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .macro-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .macro-row:last-child { border-bottom: none; }
+
+  .macro-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .macro-name {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .macro-g {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .macro-kcal {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .bar-wrap {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin-top: 12px;
+    display: flex;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  .bar-seg {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .tip-box {
+    background: rgba(200, 240, 96, 0.05);
+    border: 0.5px solid rgba(200, 240, 96, 0.2);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .tip-box strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .error {
+    background: rgba(240, 96, 96, 0.08);
+    border: 0.5px solid rgba(240, 96, 96, 0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--red);
+    margin-top: 8px;
+    display: none;
+  }
+
+  .error.show { display: block; }
+
+  .divider {
+    height: 0.5px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 24px;
+    font-family: 'DM Mono', monospace;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo">Fit Lab — Kalkulator</div>
+    <h1>Tvoje kalorije & makri</h1>
+    <p class="subtitle">Vpiši svoje podatke in dobи točne številke za tvoj cilj.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Osnovni podatki</div>
+
+    <div class="field">
+      <label>Spol</label>
+      <div class="gender-row">
+        <div class="gender-btn active" id="btn-m" onclick="setGender('m')">Moški</div>
+        <div class="gender-btn" id="btn-f" onclick="setGender('f')">Ženska</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Starost</label>
+      <div class="input-row">
+        <input type="number" id="age" placeholder="25" min="15" max="80">
+        <span class="unit">let</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Telesna teža</label>
+      <div class="input-row">
+        <input type="number" id="weight" placeholder="75" min="30" max="250">
+        <span class="unit">kg</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Višina</label>
+      <div class="input-row">
+        <input type="number" id="height" placeholder="175" min="140" max="220">
+        <span class="unit">cm</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Aktivnost</div>
+    <div class="field">
+      <select class="select-field" id="activity">
+        <option value="1.2">Sedeč (pisarniško delo, brez treninga)</option>
+        <option value="1.375">Lahka aktivnost (1–2x trening na teden)</option>
+        <option value="1.55" selected>Zmerna aktivnost (3–4x trening na teden)</option>
+        <option value="1.725">Visoka aktivnost (5–6x trening na teden)</option>
+        <option value="1.9">Zelo visoka (vsakodnevni intenziven trening)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cilj</div>
+    <div class="goal-grid">
+      <div class="goal-btn active-deficit" id="goal-deficit" onclick="setGoal('deficit')">Hujšanje<br><span style="font-size:10px;opacity:0.7">−400 kcal</span></div>
+      <div class="goal-btn" id="goal-maintain" onclick="setGoal('maintain')">Vzdrževanje<br><span style="font-size:10px;opacity:0.7">TDEE</span></div>
+      <div class="goal-btn" id="goal-surplus" onclick="setGoal('surplus')">Mišice<br><span style="font-size:10px;opacity:0.7">+250 kcal</span></div>
+    </div>
+  </div>
+
+  <div class="error" id="error">Prosim vpiši vse podatke pravilno.</div>
+
+  <button class="calc-btn" onclick="calculate()">Izračunaj moje makre →</button>
+
+  <div class="divider"></div>
+
+  <div class="results" id="results">
+    <div class="results-header">
+      <div class="results-title">Tvoji rezultati</div>
+      <div class="results-line"></div>
+    </div>
+
+    <div class="card">
+      <div class="big-number">
+        <div class="big-label">Dnevni cilj kalorij</div>
+        <div class="big-val" id="res-kcal" style="color: var(--accent)">—</div>
+        <div class="big-unit">kcal / dan</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-label">BMR</div>
+          <div class="stat-val" id="res-bmr">—</div>
+          <div class="stat-unit">kcal bazalno</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">TDEE</div>
+          <div class="stat-val" id="res-tdee">—</div>
+          <div class="stat-unit">kcal vzdrževanje</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Makrohranila na dan</div>
+
+      <div class="macro-row">
+        <div class="macro-dot" style="background: var(--accent)"></div>
+        <div class="macro-name">Beljakovine</div>
+        <div class="macro-g" id="res-protein">—</div>
+        <div class="macro-kcal" id="res-protein-kcal">—</div>
+      </div>
+      <div class="macro-row">
+        <div class="macro-dot" style="background: var(--blue)"></div>
+        <div class="macro-name">Ogljikovi hidrati</div>
+        <div class="macro-g" id="res-carbs">—</div>
+        <div class="macro-kcal" id="res-carbs-kcal">—</div>
+      </div>
+      <div class="macro-row">
+        <div class="macro-dot" style="background: var(--accent2)"></div>
+        <div class="macro-name">Maščobe</div>
+        <div class="macro-g" id="res-fat">—</div>
+        <div class="macro-kcal" id="res-fat-kcal">—</div>
+      </div>
+
+      <div class="bar-wrap">
+        <div class="bar-seg" id="bar-p" style="background: var(--accent); width: 31%"></div>
+        <div class="bar-seg" id="bar-c" style="background: var(--blue); width: 40%"></div>
+        <div class="bar-seg" id="bar-f" style="background: var(--accent2); width: 29%"></div>
+      </div>
+    </div>
+
+    <div class="tip-box" id="tip-box"></div>
+  </div>
+
+  <div class="footer">fitlab.notion.site</div>
+
+</div>
+
+<script>
+  let gender = 'm';
+  let goal = 'deficit';
+
+  function setGender(g) {
+    gender = g;
+    document.getElementById('btn-m').className = 'gender-btn' + (g === 'm' ? ' active' : '');
+    document.getElementById('btn-f').className = 'gender-btn' + (g === 'f' ? ' active' : '');
+  }
+
+  function setGoal(g) {
+    goal = g;
+    ['deficit','maintain','surplus'].forEach(x => {
+      const el = document.getElementById('goal-' + x);
+      el.className = 'goal-btn' + (x === g ? ' active-' + x : '');
+    });
+  }
+
+  function calculate() {
+    const age = parseFloat(document.getElementById('age').value);
+    const weight = parseFloat(document.getElementById('weight').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const activity = parseFloat(document.getElementById('activity').value);
+    const err = document.getElementById('error');
+
+    if (!age || !weight || !height || age < 15 || age > 80 || weight < 30 || height < 140) {
+      err.classList.add('show');
+      return;
+    }
+    err.classList.remove('show');
+
+    // Mifflin-St Jeor
+    let bmr;
+    if (gender === 'm') {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+
+    const tdee = Math.round(bmr * activity);
+    let targetKcal;
+    if (goal === 'deficit') targetKcal = tdee - 400;
+    else if (goal === 'surplus') targetKcal = tdee + 250;
+    else targetKcal = tdee;
+
+    // Macros
+    const protein = Math.round(weight * 2.0);
+    const fat = Math.round(weight * 0.9);
+    const proteinKcal = protein * 4;
+    const fatKcal = fat * 9;
+    const carbsKcal = targetKcal - proteinKcal - fatKcal;
+    const carbs = Math.round(carbsKcal / 4);
+
+    const pPct = Math.round(proteinKcal / targetKcal * 100);
+    const fPct = Math.round(fatKcal / targetKcal * 100);
+    const cPct = 100 - pPct - fPct;
+
+    document.getElementById('res-bmr').textContent = Math.round(bmr);
+    document.getElementById('res-tdee').textContent = tdee;
+    document.getElementById('res-kcal').textContent = targetKcal;
+    document.getElementById('res-protein').textContent = protein + 'g';
+    document.getElementById('res-carbs').textContent = Math.max(carbs, 50) + 'g';
+    document.getElementById('res-fat').textContent = fat + 'g';
+    document.getElementById('res-protein-kcal').textContent = proteinKcal + ' kcal';
+    document.getElementById('res-carbs-kcal').textContent = Math.max(carbsKcal, 200) + ' kcal';
+    document.getElementById('res-fat-kcal').textContent = fatKcal + ' kcal';
+
+    document.getElementById('bar-p').style.width = pPct + '%';
+    document.getElementById('bar-c').style.width = cPct + '%';
+    document.getElementById('bar-f').style.width = fPct + '%';
+
+    const tips = {
+      deficit: `<strong>Hujšanje:</strong> Si ${400} kcal pod vzdrževalnimi. To pomeni ~0.4kg izgube na teden. Prioriteta so beljakovine — z ${protein}g na dan ohranjaš mišice med hujšanjem.`,
+      maintain: `<strong>Vzdrževanje:</strong> Ješ točno toliko kot porabiš. Idealno za preoblikovanje — kuriti maščobo in graditi mišice hkrati, kar deluje posebej dobro pri začetnikih.`,
+      surplus: `<strong>Gradnja mišic:</strong> Si ${250} kcal nad vzdrževalnimi. Kontroliran surplus — boš pridobival mišice z minimalnim pridobivanjem maščobe. Treniraj vsaj 3x na teden.`
+    };
+
+    document.getElementById('tip-box').innerHTML = tips[goal];
+
+    const results = document.getElementById('results');
+    results.classList.add('show');
+    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+</script>
+</body>
+</html>
+<style>
+@media (max-width: 400px) {
+  h1 { font-size: 22px; }
+  .card { padding: 16px; }
+  .big-val { font-size: 36px; }
+  .goal-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .goal-btn { font-size: 11px; padding: 8px 4px; }
+}
+</style>
