@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fit Lab — Osebni kuhar</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0e;
+    --surface: #1a1a18;
+    --surface2: #232320;
+    --border: #2e2e2a;
+    --accent: #c8f060;
+    --accent2: #60f0a8;
+    --text: #f0ede6;
+    --text2: #b8b5a8;
+    --text3: #888070;
+    --blue: #60c8f0;
+    --coral: #f09060;
+    --purple: #a080f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 64px;
+  }
+
+  .wrap { max-width: 560px; margin: 0 auto; }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h1 { font-size: 26px; font-weight: 500; margin-bottom: 6px; }
+  h1 span { color: var(--accent); }
+
+  .subtitle { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+
+  /* Macro input */
+  .macro-input {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .macro-input-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .macro-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .macro-field label {
+    display: block;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+
+  .macro-field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+
+  .macro-field input::-webkit-outer-spin-button,
+  .macro-field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .macro-field input:focus { border-color: var(--accent); }
+
+  .macro-field .unit {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    margin-left: 4px;
+  }
+
+  .search-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: #0f0f0e;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .search-btn:hover { background: #d4f570; transform: translateY(-1px); }
+
+  /* Filter tabs */
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200, 240, 96, 0.08);
+  }
+
+  /* Recipe cards */
+  .recipes-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .recipe-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .recipe-card:hover { border-color: var(--text3); transform: translateY(-1px); }
+
+  .recipe-header {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .recipe-emoji {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border-radius: 10px;
+  }
+
+  .recipe-info { flex: 1; }
+
+  .recipe-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .recipe-sub {
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .recipe-tags { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+
+  .tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+
+  .tag-quick { background: rgba(200, 240, 96, 0.1); color: var(--accent); }
+  .tag-protein { background: rgba(96, 200, 240, 0.1); color: var(--blue); }
+  .tag-sweet { background: rgba(160, 128, 240, 0.1); color: var(--purple); }
+  .tag-savory { background: rgba(240, 144, 96, 0.1); color: var(--coral); }
+
+  .recipe-macros {
+    display: flex;
+    gap: 0;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .macro-pill {
+    flex: 1;
+    padding: 10px 8px;
+    text-align: center;
+    border-right: 0.5px solid var(--border);
+  }
+
+  .macro-pill:last-child { border-right: none; }
+
+  .macro-pill-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    display: block;
+  }
+
+  .macro-pill-label {
+    font-size: 10px;
+    color: var(--text3);
+  }
+
+  .match-indicator {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(200, 240, 96, 0.06);
+    border-top: 0.5px solid rgba(200, 240, 96, 0.2);
+    font-size: 12px;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .match-indicator.show { display: flex; }
+
+  /* Recipe detail modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--bg);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .modal-emoji {
+    font-size: 40px;
+    flex-shrink: 0;
+  }
+
+  .modal-title { font-size: 20px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .modal-sub { font-size: 13px; color: var(--text2); }
+
+  .modal-macros {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .modal-macro {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+
+  .modal-macro-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .modal-macro-label { font-size: 10px; color: var(--text3); }
+
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+  }
+
+  .ingredient-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 14px;
+  }
+
+  .ingredient-row:last-child { border-bottom: none; }
+
+  .ingredient-name { color: var(--text2); }
+
+  .ingredient-amount {
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .steps-list { list-style: none; }
+
+  .step-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .step-item:last-child { border-bottom: none; }
+
+  .step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(200, 240, 96, 0.1);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .tip-box {
+    background: rgba(200, 240, 96, 0.05);
+    border: 0.5px solid rgba(200, 240, 96, 0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-top: 16px;
+  }
+
+  .tip-box strong { color: var(--accent); }
+
+  .close-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: 0.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+
+  .adjusted-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(200, 240, 96, 0.1);
+    border: 0.5px solid rgba(200, 240, 96, 0.3);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 14px;
+  }
+
+  .divider { height: 0.5px; background: var(--border); margin: 16px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo">Fit Lab — Osebni kuhar</div>
+  <h1>Tvoj <span>osebni kuhar</span></h1>
+  <p class="subtitle">Vpiši koliko kalorij in makrov ti še ostane — samodejno prilagodim recept in količine sestavin.</p>
+
+  <!-- Macro input -->
+  <div class="macro-input">
+    <div class="macro-input-title">Koliko ti še ostane do konca dneva?</div>
+    <div class="macro-fields">
+      <div class="macro-field">
+        <label>Kalorije <span class="unit">kcal</span></label>
+        <input type="number" id="in-kcal" placeholder="450">
+      </div>
+      <div class="macro-field">
+        <label>Beljakovine <span class="unit">g</span></label>
+        <input type="number" id="in-prot" placeholder="30">
+      </div>
+      <div class="macro-field">
+        <label>Ogljikovi hidrati <span class="unit">g</span></label>
+        <input type="number" id="in-carbs" placeholder="50">
+      </div>
+      <div class="macro-field">
+        <label>Maščobe <span class="unit">g</span></label>
+        <input type="number" id="in-fat" placeholder="15">
+      </div>
+    </div>
+    <button class="search-btn" onclick="findRecipes()">Poišči recepte →</button>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-row">
+    <div class="filter-btn active" onclick="filterCat('vse', this)">Vse</div>
+    <div class="filter-btn" onclick="filterCat('sladko', this)">🍌 Sladko</div>
+    <div class="filter-btn" onclick="filterCat('slano', this)">🌯 Slano</div>
+    <div class="filter-btn" onclick="filterCat('hitro', this)">⚡ Hitro</div>
+    <div class="filter-btn" onclick="filterCat('protein', this)">💪 Visoko beljakovinski</div>
+  </div>
+
+  <!-- Legend -->
+  <div style="display:flex;gap:12px;margin-bottom:14px;font-size:12px;color:var(--text3);">
+    <span>🟢 20g+ beljakovin</span>
+    <span>🟡 12-20g</span>
+    <span>🔴 manj kot 12g</span>
+  </div>
+
+  <!-- Recipes -->
+  <div class="recipes-grid" id="recipes-grid"></div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <div class="modal-handle"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const recipes = [
+  {
+    id: 1,
+    name: "Ovsena kaša z banano in arašidovim maslom",
+    emoji: "🥣",
+    cat: ["sladko"],
+    tags: ["protein", "sweet"],
+    time: "10 min",
+    base: { kcal: 707, prot: 45, carbs: 91, fat: 20 },
+    ingredients: [
+      { name: "Ovseni kosmiči", amount: 80, unit: "g", kcalPer100: 389, protPer100: 17, carbsPer100: 66, fatPer100: 7 },
+      { name: "Banana", amount: 100, unit: "g", kcalPer100: 89, protPer100: 1, carbsPer100: 23, fatPer100: 0.3 },
+      { name: "Arašidovo maslo", amount: 20, unit: "g", kcalPer100: 588, protPer100: 25, carbsPer100: 20, fatPer100: 50 },
+      { name: "Mleko (1.5%)", amount: 200, unit: "ml", kcalPer100: 46, protPer100: 3.3, carbsPer100: 4.8, fatPer100: 1.5 },
+      { name: "Whey proteini (vanilla)", amount: 25, unit: "g", kcalPer100: 380, protPer100: 75, carbsPer100: 8, fatPer100: 5 },
+    ],
+    steps: [
+      "Ovsene kosmiče daj v lonec z mlekom in kuhaj na srednji temperaturi 5 minut, mešaj.",
+      "Ko se zgosti, umakni z ognja in počakaj 1 minuto.",
+      "Vmešaj whey proteine — ne dodajaj na ogenj da ne izgubijo vrednosti.",
+      "Banano nareži na kolobarje in položi na vrh.",
+      "Dodaj žlico arašidovega masla in po želji ščepec cimeta.",
+    ],
+    tip: "Whey dodaj po kuhanju ne med — visoka temperatura uniči del beljakovin. 1 minuta čakanja je dovolj.",
+    why: "Ovseni kosmiči dajo počasno energijo, banana hitri sladkor, arašidovo maslo zdrave maščobe, whey pa dvigne beljakovine na 33g."
+  },
+  {
+    id: 2,
+    name: "Proteinski smoothie",
+    emoji: "🥤",
+    cat: ["sladko", "hitro"],
+    tags: ["protein", "quick"],
+    time: "3 min",
+    base: { kcal: 324, prot: 27, carbs: 49, fat: 5 },
+    ingredients: [
+      { name: "Banana (zamrznjena)", amount: 120, unit: "g", kcalPer100: 89, protPer100: 1, carbsPer100: 23, fatPer100: 0.3 },
+      { name: "Skyr", amount: 150, unit: "g", kcalPer100: 63, protPer100: 11, carbsPer100: 4, fatPer100: 0.2 },
+      { name: "Mleko (1.5%)", amount: 200, unit: "ml", kcalPer100: 46, protPer100: 3.3, carbsPer100: 4.8, fatPer100: 1.5 },
+      { name: "Kakav v prahu (nesladkan)", amount: 10, unit: "g", kcalPer100: 228, protPer100: 20, carbsPer100: 10, fatPer100: 14 },
+    ],
+    steps: [
+      "Vse sestavine daj v blender.",
+      "Zmiksaj 30-60 sekund dokler ni gladko.",
+      "Postrezi takoj ali shrani v steklenico za v službo.",
+    ],
+    tip: "Zamrznjena banana naredi smoothie kremast brez ledu — ključna zamenjava.",
+    why: "28g beljakovin v 3 minutah. Idealno za jutro ko nimaš časa ali po treningu."
+  },
+  {
+    id: 3,
+    name: "Riževi kolački z arašidovim maslom in medom",
+    emoji: "🍯",
+    cat: ["sladko", "hitro"],
+    tags: ["quick", "sweet"],
+    time: "2 min",
+    base: { kcal: 280, prot: 8, carbs: 38, fat: 12 },
+    ingredients: [
+      { name: "Riževi kolački", amount: 4, unit: "kos", kcalPer100: 980, protPer100: 20, carbsPer100: 207, fatPer100: 5 },
+      { name: "Arašidovo maslo", amount: 30, unit: "g", kcalPer100: 588, protPer100: 25, carbsPer100: 20, fatPer100: 50 },
+      { name: "Med", amount: 10, unit: "g", kcalPer100: 304, protPer100: 0.3, carbsPer100: 82, fatPer100: 0 },
+    ],
+    steps: [
+      "Riževe kolačke položi na krožnik.",
+      "Na vsakega nanesi arašidovo maslo.",
+      "Pokapljaj z medom.",
+      "Po želji dodaj rezine banane ali oreščke.",
+    ],
+    tip: "Dodaj banana rezine za dodatne kalorije in sladkost brez sladkorja.",
+    why: "Hitra malica z dobrimi maščobami in počasnimi ogljikovimi hidrati. Brez kuhanja."
+  },
+  {
+    id: 4,
+    name: "Proteinska palačinka",
+    emoji: "🥞",
+    cat: ["sladko"],
+    tags: ["protein", "sweet"],
+    time: "15 min",
+    base: { kcal: 380, prot: 32, carbs: 35, fat: 10 },
+    ingredients: [
+      { name: "Ovseni kosmiči (zmleti)", amount: 60, unit: "g", kcalPer100: 370, protPer100: 13, carbsPer100: 60, fatPer100: 7 },
+      { name: "Jajca", amount: 2, unit: "kos", kcalPer100: 715, protPer100: 65, carbsPer100: 5, fatPer100: 50 },
+      { name: "Skyr", amount: 100, unit: "g", kcalPer100: 63, protPer100: 11, carbsPer100: 4, fatPer100: 0.2 },
+      { name: "Mleko (1.5%)", amount: 50, unit: "ml", kcalPer100: 46, protPer100: 3.3, carbsPer100: 4.8, fatPer100: 1.5 },
+      { name: "Prašek za pecivo", amount: 3, unit: "g", kcalPer100: 53, protPer100: 0, carbsPer100: 28, fatPer100: 0 },
+    ],
+    steps: [
+      "Ovsene kosmiče zmiksaj v moko z blenderjem ali sekalnikom.",
+      "Zmešaj vse sestavine skupaj v gladko testo.",
+      "Segreti ponev namaži z minimalnim oljem ali kokosovim oljem.",
+      "Vlij malo testa, peci 2-3 min na vsaki strani.",
+      "Postrezi s skyrom in sadjem namesto smetane.",
+    ],
+    tip: "Skyr namesto smetane = enako kremast topping, 10x manj kalorij.",
+    why: "Izgleda točno kot normalna palačinka — nihče ne ve da je zdrava. 32g beljakovin."
+  },
+  {
+    id: 5,
+    name: "Zdrava pizza na tortilji",
+    emoji: "🍕",
+    cat: ["slano"],
+    tags: ["savory", "protein"],
+    time: "15 min",
+    base: { kcal: 450, prot: 37, carbs: 38, fat: 14 },
+    ingredients: [
+      { name: "Polnozrnata tortila (large)", amount: 1, unit: "kos", kcalPer100: 1740, protPer100: 54, carbsPer100: 288, fatPer100: 42 },
+      { name: "Paradižnikova omaka (brez sladkorja)", amount: 60, unit: "g", kcalPer100: 35, protPer100: 1.5, carbsPer100: 7, fatPer100: 0.3 },
+      { name: "Mozzarella (light)", amount: 60, unit: "g", kcalPer100: 190, protPer100: 18, carbsPer100: 1, fatPer100: 13 },
+      { name: "Piščančja prsa (surova)", amount: 80, unit: "g", kcalPer100: 165, protPer100: 31, carbsPer100: 0, fatPer100: 3.6 },
+      { name: "Paprika", amount: 50, unit: "g", kcalPer100: 31, protPer100: 1, carbsPer100: 6, fatPer100: 0.3 },
+    ],
+    steps: [
+      "Pečico segrij na 200°C.",
+      "Tortilo položi na pekač.",
+      "Nanesi paradižnikovo omako do roba.",
+      "Dodaj narezano mozzarello, piščanca in papriko.",
+      "Peci 8-10 minut dokler sir ne porjavi.",
+    ],
+    tip: "Light mozzarella ima enak okus kot navadna — prihrani 40 kcal na 100g.",
+    why: "Pizza ki jo pojeste brez slabe vesti. 35g beljakovin, manj kot 450 kcal."
+  },
+  {
+    id: 6,
+    name: "Čokoladni mousse iz skyrja",
+    emoji: "🍫",
+    cat: ["sladko", "hitro"],
+    tags: ["protein", "sweet", "quick"],
+    time: "5 min",
+    base: { kcal: 220, prot: 24, carbs: 18, fat: 4 },
+    ingredients: [
+      { name: "Skyr (navaden)", amount: 200, unit: "g", kcalPer100: 63, protPer100: 11, carbsPer100: 4, fatPer100: 0.2 },
+      { name: "Kakav v prahu (nesladkan)", amount: 15, unit: "g", kcalPer100: 228, protPer100: 20, carbsPer100: 10, fatPer100: 14 },
+      { name: "Med", amount: 15, unit: "g", kcalPer100: 304, protPer100: 0.3, carbsPer100: 82, fatPer100: 0 },
+      { name: "Vaniljev ekstrakt", amount: 2, unit: "ml", kcalPer100: 288, protPer100: 0, carbsPer100: 13, fatPer100: 0.1 },
+    ],
+    steps: [
+      "Skyr daj v skledo.",
+      "Dodaj kakav, med in vaniljev ekstrakt.",
+      "Dobro premešaj dokler ni kremasto in enakomerno.",
+      "Postavi v hladilnik za 30 minut za boljšo teksturo.",
+      "Postrezi s svežimi jagodami ali banano.",
+    ],
+    tip: "Za bolj kremasto teksturo dodaj žlico arašidovega masla — dobi Snickers efekt.",
+    why: "24g beljakovin v desertu ki izgleda kot pravi mousse. Nihče ne verjame da je zdrav."
+  },
+  {
+    id: 7,
+    name: '"Big Mac" bowl',
+    emoji: "🍔",
+    cat: ["slano"],
+    tags: ["savory", "protein"],
+    time: "20 min",
+    base: { kcal: 480, prot: 42, carbs: 28, fat: 18 },
+    ingredients: [
+      { name: "Goveje meso (5% maščobe)", amount: 150, unit: "g", kcalPer100: 136, protPer100: 22, carbsPer100: 0, fatPer100: 5 },
+      { name: "Solata (ledena)", amount: 80, unit: "g", kcalPer100: 14, protPer100: 1, carbsPer100: 2, fatPer100: 0.2 },
+      { name: "Paradižnik", amount: 80, unit: "g", kcalPer100: 18, protPer100: 0.9, carbsPer100: 3.5, fatPer100: 0.2 },
+      { name: "Kisla kumarica", amount: 30, unit: "g", kcalPer100: 12, protPer100: 0.4, carbsPer100: 2, fatPer100: 0.2 },
+      { name: "Grčki jogurt (0%)", amount: 60, unit: "g", kcalPer100: 57, protPer100: 10, carbsPer100: 3.5, fatPer100: 0.4 },
+      { name: "Gorčica", amount: 10, unit: "g", kcalPer100: 66, protPer100: 4, carbsPer100: 6, fatPer100: 3 },
+      { name: "Kečap (brez sladkorja)", amount: 20, unit: "g", kcalPer100: 35, protPer100: 1, carbsPer100: 8, fatPer100: 0.1 },
+      { name: "Cheddar sir (light)", amount: 20, unit: "g", kcalPer100: 270, protPer100: 25, carbsPer100: 1, fatPer100: 18 },
+    ],
+    steps: [
+      "Goveje meso začini s soljo, poprom in česnom v prahu.",
+      "Peci na suhi ponvi na srednji temperaturi 5-7 minut.",
+      "Zmešaj jogurt, gorčico in kečap — to je tvoj 'Big Mac' sos.",
+      "V skledo daj solato in paradižnik na dno.",
+      "Dodaj meso, sir in kisle kumarice.",
+      "Prelijz sosom.",
+    ],
+    tip: "Grški jogurt + gorčica + kečap = Big Mac sos brez kalorij. Resnično.",
+    why: "Vse kar ljubiš pri Big Macu — brez kruha, brez friteiranega, z 42g beljakovin."
+  },
+  {
+    id: 8,
+    name: "Proteinski sladoled iz banane",
+    emoji: "🍦",
+    cat: ["sladko", "hitro"],
+    tags: ["sweet", "quick", "protein"],
+    time: "5 min + zamrzovanje",
+    base: { kcal: 260, prot: 22, carbs: 34, fat: 3 },
+    ingredients: [
+      { name: "Banana (zamrznjena)", amount: 150, unit: "g", kcalPer100: 89, protPer100: 1, carbsPer100: 23, fatPer100: 0.3 },
+      { name: "Skyr (navaden)", amount: 150, unit: "g", kcalPer100: 63, protPer100: 11, carbsPer100: 4, fatPer100: 0.2 },
+      { name: "Kakav v prahu (nesladkan)", amount: 10, unit: "g", kcalPer100: 228, protPer100: 20, carbsPer100: 10, fatPer100: 14 },
+      { name: "Med", amount: 8, unit: "g", kcalPer100: 304, protPer100: 0.3, carbsPer100: 82, fatPer100: 0 },
+    ],
+    steps: [
+      "Banano olupi, nareži na kolobarje in zamrzni vsaj 4 ure (ali čez noč).",
+      "Zamrznjeno banano daj v blender ali sekalnik.",
+      "Zmiksaj dokler ni kremasta konsistenca — traja 2-3 minute.",
+      "Dodaj skyr, kakav in med, zmiksaj še 30 sekund.",
+      "Postrezi takoj za mehak sladoled ali zamrzni še 1 uro za tršega.",
+    ],
+    tip: "Ključ je popolnoma zamrznjena banana — ne pol-zamrznjena. Drugače je preveč tekoče.",
+    why: "Zamrznjena banana da kremasto teksturo brez smetane. Skyr doda beljakovine, kakav antioksidante. 260 kcal namesto 400+ za navaden sladoled."
+  },
+  {
+    id: 9,
+    name: "Zdrav kebab bowl",
+    emoji: "🥙",
+    cat: ["slano"],
+    tags: ["savory", "protein"],
+    time: "20 min",
+    base: { kcal: 490, prot: 48, carbs: 32, fat: 14 },
+    ingredients: [
+      { name: "Piščančja stegna brez kože (surova)", amount: 150, unit: "g", kcalPer100: 143, protPer100: 17, carbsPer100: 0, fatPer100: 7 },
+      { name: "Grški jogurt (0%)", amount: 80, unit: "g", kcalPer100: 57, protPer100: 10, carbsPer100: 3.5, fatPer100: 0.4 },
+      { name: "Solata", amount: 60, unit: "g", kcalPer100: 14, protPer100: 1, carbsPer100: 2, fatPer100: 0.2 },
+      { name: "Paradižnik", amount: 80, unit: "g", kcalPer100: 18, protPer100: 0.9, carbsPer100: 3.5, fatPer100: 0.2 },
+      { name: "Rdeča čebula", amount: 40, unit: "g", kcalPer100: 40, protPer100: 1, carbsPer100: 9, fatPer100: 0.1 },
+      { name: "Kumarica", amount: 60, unit: "g", kcalPer100: 12, protPer100: 0.6, carbsPer100: 2, fatPer100: 0.1 },
+      { name: "Olivno olje", amount: 10, unit: "ml", kcalPer100: 884, protPer100: 0, carbsPer100: 0, fatPer100: 100 },
+    ],
+    steps: [
+      "Piščanca mariniraš v jogurtu, česnu, kurkumi, kumini in papriki 30 min.",
+      "Peci na ponvi ali žaru 6-8 minut na vsaki strani.",
+      "Zelenjavo nareži in daj v skledo.",
+      "Dodaj piščanca narezanega na trakove.",
+      "Prelij z jogurtovim sosom (jogurt + česen + limona + kumina).",
+    ],
+    tip: "Marinada v jogurtu naredi piščanca neverjetno mehkega — to je skrivnost dobrega kebaba.",
+    why: "45g beljakovin, zelenjava, fermentirani jogurt. Kebab ki te ne ubije."
+  },
+  {
+    id: 10,
+    name: "Piščančji wrap",
+    emoji: "🌯",
+    cat: ["slano", "hitro"],
+    tags: ["savory", "protein", "quick"],
+    time: "15 min",
+    base: { kcal: 460, prot: 47, carbs: 34, fat: 15 },
+    ingredients: [
+      { name: "Polnozrnata tortila", amount: 1, unit: "kos", kcalPer100: 1740, protPer100: 54, carbsPer100: 288, fatPer100: 42 },
+      { name: "Piščančja prsa (surova)", amount: 120, unit: "g", kcalPer100: 165, protPer100: 31, carbsPer100: 0, fatPer100: 3.6 },
+      { name: "Grški jogurt (0%)", amount: 40, unit: "g", kcalPer100: 57, protPer100: 10, carbsPer100: 3.5, fatPer100: 0.4 },
+      { name: "Solata (ledena)", amount: 40, unit: "g", kcalPer100: 14, protPer100: 1, carbsPer100: 2, fatPer100: 0.2 },
+      { name: "Paradižnik", amount: 60, unit: "g", kcalPer100: 18, protPer100: 0.9, carbsPer100: 3.5, fatPer100: 0.2 },
+      { name: "Avokado", amount: 40, unit: "g", kcalPer100: 160, protPer100: 2, carbsPer100: 9, fatPer100: 15 },
+    ],
+    steps: [
+      "Piščanca začini in peci na ponvi 5-6 minut na vsaki strani.",
+      "Zmešaj jogurt s česnom in limonino lupinico — to je tvoj sos.",
+      "Tortilo položi na ravno površino.",
+      "Nanesi sos, dodaj solato, paradižnik, avokado in piščanca.",
+      "Zavij tesno in prepolovi.",
+    ],
+    tip: "Jogurtov sos namesto majoneze = enako kremasto, 80% manj kalorij.",
+    why: "38g beljakovin v wrapu ki ga pojeste v roki. Idealno za v službo ali po treningu."
+  },
+  {
+    id: 11,
+    name: "Cheesecake v kozarcu",
+    emoji: "🍰",
+    cat: ["sladko", "hitro"],
+    tags: ["protein", "sweet", "quick"],
+    time: "10 min + 1h hlajenje",
+    base: { kcal: 280, prot: 24, carbs: 22, fat: 8 },
+    ingredients: [
+      { name: "Skyr (navaden)", amount: 150, unit: "g", kcalPer100: 63, protPer100: 11, carbsPer100: 4, fatPer100: 0.2 },
+      { name: "Kremni sir light (Philadelphia)", amount: 80, unit: "g", kcalPer100: 145, protPer100: 7, carbsPer100: 4, fatPer100: 11 },
+      { name: "Med", amount: 15, unit: "g", kcalPer100: 304, protPer100: 0.3, carbsPer100: 82, fatPer100: 0 },
+      { name: "Limonin sok", amount: 10, unit: "ml", kcalPer100: 22, protPer100: 0.4, carbsPer100: 6, fatPer100: 0.2 },
+      { name: "Digestive piškoti (polnozrnati)", amount: 30, unit: "g", kcalPer100: 471, protPer100: 7, carbsPer100: 63, fatPer100: 20 },
+      { name: "Jagode sveže", amount: 80, unit: "g", kcalPer100: 32, protPer100: 0.7, carbsPer100: 7, fatPer100: 0.3 },
+    ],
+    steps: [
+      "Piškote zdrobi in daj na dno kozarca — to je osnova.",
+      "Zmešaj skyr, kremni sir, med in limonin sok dokler ni gladko.",
+      "Vlij kremo na piškote.",
+      "Na vrh položi jagode.",
+      "Daj v hladilnik za vsaj 1 uro.",
+    ],
+    tip: "Bolj ko je hladen, bolj je kremast. Čez noč v hladilniku je najboljše.",
+    why: "Skyr je baza tega mousssa — visoke beljakovine, nizke maščobe. Kakav doda antioksidante, med naravni sladkor brez predelave."
+  },
+  {
+    id: 12,
+    name: "Fit burger",
+    emoji: "🍔",
+    cat: ["slano"],
+    tags: ["protein", "savory"],
+    time: "20 min",
+    base: { kcal: 480, prot: 42, carbs: 35, fat: 16 },
+    ingredients: [
+      { name: "Goveje meso 5% maščobe (surovo)", amount: 150, unit: "g", kcalPer100: 136, protPer100: 22, carbsPer100: 0, fatPer100: 5 },
+      { name: "Polnozrnat žemeljček", amount: 60, unit: "g", kcalPer100: 265, protPer100: 9, carbsPer100: 48, fatPer100: 4 },
+      { name: "Cheddar light", amount: 20, unit: "g", kcalPer100: 270, protPer100: 25, carbsPer100: 1, fatPer100: 18 },
+      { name: "Grški jogurt 0%", amount: 30, unit: "g", kcalPer100: 57, protPer100: 10, carbsPer100: 3.5, fatPer100: 0.4 },
+      { name: "Gorčica", amount: 10, unit: "g", kcalPer100: 66, protPer100: 4, carbsPer100: 6, fatPer100: 3 },
+      { name: "Ledena solata", amount: 30, unit: "g", kcalPer100: 14, protPer100: 1, carbsPer100: 2, fatPer100: 0.2 },
+      { name: "Paradižnik", amount: 50, unit: "g", kcalPer100: 18, protPer100: 0.9, carbsPer100: 3.5, fatPer100: 0.2 },
+      { name: "Kisla kumarica", amount: 20, unit: "g", kcalPer100: 12, protPer100: 0.4, carbsPer100: 2, fatPer100: 0.2 },
+    ],
+    steps: [
+      "Meso začini s soljo, poprom in česnom v prahu. Oblikuj pljeskavico.",
+      "Peci na suhi ponvi 4-5 min na vsaki strani.",
+      "Zadnjo minuto dodaj sir na vrh da se stopi.",
+      "Zmešaj jogurt z gorčico — to je tvoj sos.",
+      "Žemeljček popeci na suhi ponvi 1 min.",
+      "Sestavi: sos, solata, pljeskavica, paradižnik, kumarica.",
+    ],
+    tip: "Jogurt + gorčica = burger sos brez majoneze. Enako kremasto, 80% manj kalorij.",
+    why: "42g beljakovin v burgerju. Goveje meso 5% maščobe je ključ — okus brez odvečne maščobe."
+  },
+  {
+    id: 13,
+    name: "Losos s pečenim krompirjem in brokolijem",
+    emoji: "🐟",
+    cat: ["slano"],
+    tags: ["protein", "savory"],
+    time: "30 min",
+    base: { kcal: 460, prot: 38, carbs: 35, fat: 16 },
+    ingredients: [
+      { name: "Losos file (surov)", amount: 150, unit: "g", kcalPer100: 208, protPer100: 20, carbsPer100: 0, fatPer100: 14 },
+      { name: "Krompir", amount: 200, unit: "g", kcalPer100: 77, protPer100: 2, carbsPer100: 17, fatPer100: 0.1 },
+      { name: "Brokoli", amount: 150, unit: "g", kcalPer100: 34, protPer100: 2.8, carbsPer100: 7, fatPer100: 0.4 },
+      { name: "Olivno olje", amount: 10, unit: "ml", kcalPer100: 884, protPer100: 0, carbsPer100: 0, fatPer100: 100 },
+      { name: "Limon", amount: 1, unit: "kos", kcalPer100: 29, protPer100: 1, carbsPer100: 9, fatPer100: 0.3 },
+    ],
+    steps: [
+      "Pečico segrij na 200°C.",
+      "Krompir nareži na kocke, začini z oljem, soljo in rozmarinom. Peci 20 min.",
+      "Po 20 min dodaj brokoli in losos na pekač.",
+      "Lososa začini z limonom, soljo in poprom.",
+      "Peci še 12-15 minut dokler losos ni kuhan.",
+    ],
+    tip: "Vse na enem pekaču — manj pomivanja. Losos je kuhan ko se lepo loči z vilico.",
+    why: "Omega-3 iz lososa, kompleksni ogljikovi hidrati iz krompirja, vlaknine iz brokolija. Popoln obrok."
+  },
+  {
+    id: 14,
+    name: "Grška solata s tuno in feto",
+    emoji: "🥗",
+    cat: ["slano", "hitro"],
+    tags: ["protein", "savory", "quick"],
+    time: "10 min",
+    base: { kcal: 320, prot: 30, carbs: 12, fat: 16 },
+    ingredients: [
+      { name: "Tuna v lastnem soku", amount: 150, unit: "g", kcalPer100: 95, protPer100: 22, carbsPer100: 0, fatPer100: 1 },
+      { name: "Feta sir", amount: 50, unit: "g", kcalPer100: 264, protPer100: 14, carbsPer100: 4, fatPer100: 21 },
+      { name: "Paradižnik", amount: 100, unit: "g", kcalPer100: 18, protPer100: 0.9, carbsPer100: 3.5, fatPer100: 0.2 },
+      { name: "Kumarica", amount: 100, unit: "g", kcalPer100: 12, protPer100: 0.6, carbsPer100: 2, fatPer100: 0.1 },
+      { name: "Olive (črne)", amount: 30, unit: "g", kcalPer100: 145, protPer100: 1, carbsPer100: 4, fatPer100: 15 },
+      { name: "Rdeča čebula", amount: 30, unit: "g", kcalPer100: 40, protPer100: 1, carbsPer100: 9, fatPer100: 0.1 },
+      { name: "Olivno olje", amount: 10, unit: "ml", kcalPer100: 884, protPer100: 0, carbsPer100: 0, fatPer100: 100 },
+    ],
+    steps: [
+      "Zelenjavo nareži na kocke.",
+      "Vse skupaj daj v skledo.",
+      "Dodaj tuno in feto.",
+      "Prelij z olivnim oljem in limonovim sokom.",
+      "Začini z origanom, soljo in poprom.",
+    ],
+    tip: "Tuna v lastnem soku ima 3x manj kalorij kot tuna v olju — enaka beljakovinska vrednost.",
+    why: "30g beljakovin v 10 minutah brez kuhanja. Mediteranska prehrana v skledi."
+  },
+  {
+    id: 15,
+    name: "Cezar solata z grškim jogurtom",
+    emoji: "🥬",
+    cat: ["slano", "hitro"],
+    tags: ["protein", "savory", "quick"],
+    time: "15 min",
+    base: { kcal: 390, prot: 42, carbs: 18, fat: 12 },
+    ingredients: [
+      { name: "Piščančja prsa (surova)", amount: 120, unit: "g", kcalPer100: 165, protPer100: 31, carbsPer100: 0, fatPer100: 3.6 },
+      { name: "Rimska solata", amount: 100, unit: "g", kcalPer100: 17, protPer100: 1.2, carbsPer100: 3, fatPer100: 0.3 },
+      { name: "Grški jogurt 0%", amount: 60, unit: "g", kcalPer100: 57, protPer100: 10, carbsPer100: 3.5, fatPer100: 0.4 },
+      { name: "Parmezan (nariban)", amount: 20, unit: "g", kcalPer100: 431, protPer100: 38, carbsPer100: 4, fatPer100: 29 },
+      { name: "Limonin sok", amount: 15, unit: "ml", kcalPer100: 22, protPer100: 0.4, carbsPer100: 6, fatPer100: 0.2 },
+      { name: "Worcestershire omaka", amount: 5, unit: "ml", kcalPer100: 78, protPer100: 1, carbsPer100: 18, fatPer100: 0 },
+      { name: "Polnozrnati krutoni", amount: 30, unit: "g", kcalPer100: 400, protPer100: 12, carbsPer100: 70, fatPer100: 10 },
+    ],
+    steps: [
+      "Zmešaj jogurt, limonin sok, worcestershire omako, nariban parmezan in česen — cezar sos.",
+      "Solato nareži in daj v skledo.",
+      "Piščanca nareži na trakove in dodaj.",
+      "Prelij s sosom.",
+      "Dodaj krutone in nariban parmezan na vrh.",
+    ],
+    tip: "Grški jogurt namesto majoneze v sosu = enak kremast okus, 70% manj kalorij.",
+    why: "Klasičen cezar ima 600+ kcal. Ta verzija 350 kcal in 35g beljakovin."
+  },
+  {
+    id: 16,
+    name: "French toast proteinski",
+    emoji: "🍞",
+    cat: ["sladko"],
+    tags: ["protein", "sweet"],
+    time: "10 min",
+    base: { kcal: 360, prot: 30, carbs: 32, fat: 10 },
+    ingredients: [
+      { name: "Polnozrnat kruh (debele rezine)", amount: 2, unit: "kos", kcalPer100: 247, protPer100: 9, carbsPer100: 45, fatPer100: 3 },
+      { name: "Jajca", amount: 2, unit: "kos", kcalPer100: 715, protPer100: 65, carbsPer100: 5, fatPer100: 50 },
+      { name: "Skyr", amount: 80, unit: "g", kcalPer100: 63, protPer100: 11, carbsPer100: 4, fatPer100: 0.2 },
+      { name: "Mleko 1.5%", amount: 40, unit: "ml", kcalPer100: 46, protPer100: 3.3, carbsPer100: 4.8, fatPer100: 1.5 },
+      { name: "Cimet", amount: 3, unit: "g", kcalPer100: 247, protPer100: 4, carbsPer100: 81, fatPer100: 1 },
+      { name: "Vaniljev ekstrakt", amount: 2, unit: "ml", kcalPer100: 288, protPer100: 0, carbsPer100: 13, fatPer100: 0.1 },
+    ],
+    steps: [
+      "Zmešaj jajca, mleko, cimet in vaniljev ekstrakt v plitvi skledi.",
+      "Kruh namakaj v mešanici 30 sekund na vsaki strani.",
+      "Peci na suhi ponvi 2-3 minute na vsaki strani dokler ni zlato rjav.",
+      "Postrezi s skyrom namesto smetane in svežim sadjem.",
+    ],
+    tip: "Skyr na vrhu namesto sladke smetane — enako kremasto, 25g beljakovin extra.",
+    why: "French toast ki ga ješ brez slabe vesti. 30g beljakovin, polnozrnat kruh za počasno energijo."
+  },
+  {
+    id: 17,
+    name: "Testenine s tuno",
+    emoji: "🍝",
+    cat: ["slano", "hitro"],
+    tags: ["protein", "savory", "quick"],
+    time: "15 min",
+    base: { kcal: 440, prot: 36, carbs: 52, fat: 8 },
+    ingredients: [
+      { name: "Polnozrnate testenine", amount: 80, unit: "g", kcalPer100: 352, protPer100: 13, carbsPer100: 67, fatPer100: 2 },
+      { name: "Tuna v lastnem soku", amount: 150, unit: "g", kcalPer100: 95, protPer100: 22, carbsPer100: 0, fatPer100: 1 },
+      { name: "Paradižnikova omaka (brez sladkorja)", amount: 100, unit: "g", kcalPer100: 35, protPer100: 1.5, carbsPer100: 7, fatPer100: 0.3 },
+      { name: "Česen", amount: 2, unit: "kos", kcalPer100: 149, protPer100: 6, carbsPer100: 33, fatPer100: 0.5 },
+      { name: "Olivno olje", amount: 8, unit: "ml", kcalPer100: 884, protPer100: 0, carbsPer100: 0, fatPer100: 100 },
+      { name: "Kapre", amount: 20, unit: "g", kcalPer100: 23, protPer100: 2, carbsPer100: 5, fatPer100: 0.9 },
+    ],
+    steps: [
+      "Skuhaj testenine po navodilih na embalaži.",
+      "Na olivnem olju popraži česen 1 minuto.",
+      "Dodaj paradižnikovo omako in kapre, kuhaj 3 minute.",
+      "Dodaj odcejeno tuno in premešaj.",
+      "Zmešaj s testeninami, začini s soljo in poprom.",
+    ],
+    tip: "Kapre dajo mediteranski okus ki dvigne cel recept — ne preskoči jih.",
+    why: "36g beljakovin v 15 minutah. Testenine s tuno so podcenjen fit obrok."
+  },
+  {
+    id: 18,
+    name: "Crispy piščanec iz koruznih kosmičev v airfryer",
+    emoji: "🍗",
+    cat: ["slano"],
+    tags: ["protein", "savory"],
+    time: "25 min",
+    base: { kcal: 380, prot: 42, carbs: 28, fat: 8 },
+    ingredients: [
+      { name: "Piščančja prsa (surova)", amount: 200, unit: "g", kcalPer100: 165, protPer100: 31, carbsPer100: 0, fatPer100: 3.6 },
+      { name: "Koruzni kosmiči (nesladkani)", amount: 60, unit: "g", kcalPer100: 357, protPer100: 8, carbsPer100: 84, fatPer100: 0.4 },
+      { name: "Jajca", amount: 1, unit: "kos", kcalPer100: 715, protPer100: 65, carbsPer100: 5, fatPer100: 50 },
+      { name: "Grški jogurt 0%", amount: 40, unit: "g", kcalPer100: 57, protPer100: 10, carbsPer100: 3.5, fatPer100: 0.4 },
+      { name: "Paprika v prahu", amount: 5, unit: "g", kcalPer100: 282, protPer100: 14, carbsPer100: 54, fatPer100: 13 },
+      { name: "Česnov prašek", amount: 3, unit: "g", kcalPer100: 331, protPer100: 17, carbsPer100: 73, fatPer100: 0.5 },
+    ],
+    steps: [
+      "Piščanca nareži na trakove ali pusti cela prsa.",
+      "Mariniraј v jogurtu, papriki in česnovem prahu 15 minut.",
+      "Koruzne kosmiče zdrobi v vrečki z valjarjem — ne premaj.",
+      "Piščanca pomakaj v jajce, potem v zdrobljene kosmiče.",
+      "Airfryer na 200°C, 12-15 minut, obrni na polovici.",
+    ],
+    tip: "Brez airfryer-ja? Peci v pečici na 220°C 20 minut na rešetki — enako hrustljavo.",
+    why: "42g beljakovin, hrustljavo kot ocvrto ampak brez olja. Koruzni kosmiči so skrivnost."
+  },
+  {
+    id: 19,
+    name: "Mac and cheese fit verzija",
+    emoji: "🧀",
+    cat: ["slano"],
+    tags: ["protein", "savory"],
+    time: "20 min",
+    base: { kcal: 420, prot: 32, carbs: 45, fat: 12 },
+    ingredients: [
+      { name: "Polnozrnate testenine (makaroni)", amount: 80, unit: "g", kcalPer100: 352, protPer100: 13, carbsPer100: 67, fatPer100: 2 },
+      { name: "Cottage cheese", amount: 150, unit: "g", kcalPer100: 98, protPer100: 11, carbsPer100: 3, fatPer100: 4 },
+      { name: "Cheddar light (nariban)", amount: 40, unit: "g", kcalPer100: 270, protPer100: 25, carbsPer100: 1, fatPer100: 18 },
+      { name: "Mleko 1.5%", amount: 60, unit: "ml", kcalPer100: 46, protPer100: 3.3, carbsPer100: 4.8, fatPer100: 1.5 },
+      { name: "Gorčica", amount: 8, unit: "g", kcalPer100: 66, protPer100: 4, carbsPer100: 6, fatPer100: 3 },
+      { name: "Česnov prašek", amount: 3, unit: "g", kcalPer100: 331, protPer100: 17, carbsPer100: 73, fatPer100: 0.5 },
+    ],
+    steps: [
+      "Skuhaj testenine po navodilih.",
+      "Cottage cheese, mleko, gorčico in česnov prašek zmiksaj z blenderjem dokler ni gladko.",
+      "Daj omako v lonec na nizki temperaturi, dodaj nariban cheddar.",
+      "Mešaj dokler se sir ne stopi.",
+      "Zmešaj s testeninami in takoj postrezi.",
+    ],
+    tip: "Cottage cheese zmiksaj v popolnoma gladko — to je skrivnost kremaste omake brez smetane.",
+    why: "Navaden mac and cheese ima 600+ kcal in 15g beljakovin. Ta verzija 420 kcal in 32g beljakovin."
+  },
+  {
+    id: 20,
+    name: "Proteinski piškoti",
+    emoji: "🍪",
+    cat: ["sladko"],
+    tags: ["protein", "sweet"],
+    time: "20 min",
+    base: { kcal: 280, prot: 20, carbs: 28, fat: 8 },
+    ingredients: [
+      { name: "Ovseni kosmiči", amount: 80, unit: "g", kcalPer100: 370, protPer100: 13, carbsPer100: 60, fatPer100: 7 },
+      { name: "Arašidovo maslo", amount: 40, unit: "g", kcalPer100: 588, protPer100: 25, carbsPer100: 20, fatPer100: 50 },
+      { name: "Jajca", amount: 1, unit: "kos", kcalPer100: 715, protPer100: 65, carbsPer100: 5, fatPer100: 50 },
+      { name: "Med", amount: 20, unit: "g", kcalPer100: 304, protPer100: 0.3, carbsPer100: 82, fatPer100: 0 },
+      { name: "Temna čokolada 85%", amount: 20, unit: "g", kcalPer100: 598, protPer100: 8, carbsPer100: 20, fatPer100: 46 },
+      { name: "Cimet", amount: 3, unit: "g", kcalPer100: 247, protPer100: 4, carbsPer100: 81, fatPer100: 1 },
+    ],
+    steps: [
+      "Pečico segrij na 180°C.",
+      "Zmešaj vse sestavine skupaj v skledi.",
+      "Čokolado nareži na majhne koščke in dodaj.",
+      "Oblikuj kroglice in jih splošči na pekaču z peki papirjem.",
+      "Peci 10-12 minut — ostanejo mehki ko so topli, se strdijo ko se ohladijo.",
+    ],
+    tip: "Ne peci predolgo — videti morajo še malo surovi ko jih vzameš iz pečice. Ko se ohladijo so popolni.",
+    why: "Ovseni kosmiči in arašidovo maslo dajo strukturo, jajce poveže sestavine, med nadomesti sladkor. Temna čokolada 85% doda antioksidante."
+  },
+  {
+    id: 21,
+    name: "Protein lava cake",
+    emoji: "🎂",
+    cat: ["sladko"],
+    tags: ["protein", "sweet"],
+    time: "15 min",
+    base: { kcal: 300, prot: 22, carbs: 24, fat: 12 },
+    ingredients: [
+      { name: "Jajca", amount: 2, unit: "kos", kcalPer100: 715, protPer100: 65, carbsPer100: 5, fatPer100: 50 },
+      { name: "Temna čokolada 85%", amount: 40, unit: "g", kcalPer100: 598, protPer100: 8, carbsPer100: 20, fatPer100: 46 },
+      { name: "Skyr", amount: 60, unit: "g", kcalPer100: 63, protPer100: 11, carbsPer100: 4, fatPer100: 0.2 },
+      { name: "Ovsena moka", amount: 20, unit: "g", kcalPer100: 370, protPer100: 13, carbsPer100: 60, fatPer100: 7 },
+      { name: "Kakav v prahu", amount: 10, unit: "g", kcalPer100: 228, protPer100: 20, carbsPer100: 10, fatPer100: 14 },
+      { name: "Med", amount: 10, unit: "g", kcalPer100: 304, protPer100: 0.3, carbsPer100: 82, fatPer100: 0 },
+    ],
+    steps: [
+      "Pečico segrij na 200°C.",
+      "Čokolado raztopi v mikrovalovni 30 sekund, premešaj.",
+      "Zmešaj jajca, skyr, med in kakav.",
+      "Dodaj ovseno moko in raztopljeno čokolado.",
+      "Vlij v namazan ramekijn ali skodelico odporno na pečico.",
+      "Peci točno 8-9 minut — sredina mora ostati tekoča.",
+    ],
+    tip: "Čas je ključen — 8 minut za tekoče sredino, 10 minut za bolj pečen. Preizkusi z zobotrebcem.",
+    why: "Jajca in skyr data beljakovine, ovsena moka nadomesti belo moko, temna čokolada doda intenziven okus z manj sladkorja kot mlečna."
+  },
+  {
+    id: 22,
+    name: "Piščanec v smetanovi omaki",
+    emoji: "🍲",
+    cat: ["slano"],
+    tags: ["protein", "savory"],
+    time: "25 min",
+    base: { kcal: 400, prot: 40, carbs: 12, fat: 18 },
+    ingredients: [
+      { name: "Piščančja prsa (surova)", amount: 200, unit: "g", kcalPer100: 165, protPer100: 31, carbsPer100: 0, fatPer100: 3.6 },
+      { name: "Grški jogurt 0%", amount: 100, unit: "g", kcalPer100: 57, protPer100: 10, carbsPer100: 3.5, fatPer100: 0.4 },
+      { name: "Kremni sir light", amount: 50, unit: "g", kcalPer100: 145, protPer100: 7, carbsPer100: 4, fatPer100: 11 },
+      { name: "Česen", amount: 3, unit: "kos", kcalPer100: 149, protPer100: 6, carbsPer100: 33, fatPer100: 0.5 },
+      { name: "Špinača", amount: 80, unit: "g", kcalPer100: 23, protPer100: 2.9, carbsPer100: 3.6, fatPer100: 0.4 },
+      { name: "Piščančja juha (brez soli)", amount: 100, unit: "ml", kcalPer100: 10, protPer100: 1, carbsPer100: 1, fatPer100: 0.2 },
+      { name: "Olivno olje", amount: 8, unit: "ml", kcalPer100: 884, protPer100: 0, carbsPer100: 0, fatPer100: 100 },
+    ],
+    steps: [
+      "Piščanca začini in peci na olivnem olju 5-6 minut na vsaki strani. Odstrani iz ponve.",
+      "V isti ponvi popraži česen 1 minuto.",
+      "Dodaj juho in špinačo, kuhaj 2 minuti.",
+      "Zmešaj jogurt in kremni sir, dodaj v ponev na nizki temperaturi.",
+      "Ne segrévaj preveč — jogurt se ne sme sesesti.",
+      "Vrni piščanca v omako, kuhaj še 3 minute.",
+    ],
+    tip: "Jogurt dodaj na samem koncu na nizki temperaturi — to je ključ da se omaka ne sesede.",
+    why: "Smetanova omaka brez smetane. 40g beljakovin, kremasto, bogato — nihče ne ve da je fit."
+  },
+  {
+    id: 23,
+    name: "Fit čufti v paradižnikovi omaki",
+    emoji: "🍅",
+    cat: ["slano"],
+    tags: ["protein", "savory"],
+    time: "30 min",
+    base: { kcal: 420, prot: 38, carbs: 28, fat: 14 },
+    ingredients: [
+      { name: "Goveje meso 5% maščobe (surovo)", amount: 200, unit: "g", kcalPer100: 136, protPer100: 22, carbsPer100: 0, fatPer100: 5 },
+      { name: "Ovseni kosmiči (namočeni)", amount: 30, unit: "g", kcalPer100: 370, protPer100: 13, carbsPer100: 60, fatPer100: 7 },
+      { name: "Jajca", amount: 1, unit: "kos", kcalPer100: 715, protPer100: 65, carbsPer100: 5, fatPer100: 50 },
+      { name: "Paradižnikova omaka (brez sladkorja)", amount: 200, unit: "g", kcalPer100: 35, protPer100: 1.5, carbsPer100: 7, fatPer100: 0.3 },
+      { name: "Česen", amount: 2, unit: "kos", kcalPer100: 149, protPer100: 6, carbsPer100: 33, fatPer100: 0.5 },
+      { name: "Peteršilj svež", amount: 15, unit: "g", kcalPer100: 36, protPer100: 3, carbsPer100: 6, fatPer100: 0.8 },
+    ],
+    steps: [
+      "Ovsene kosmiče namakaj v 2 žlicah vode 5 minut.",
+      "Zmešaj meso, kosmiče, jajce, česen in peteršilj.",
+      "Oblikuj čufte — malo manjše od golf žogice.",
+      "Peci na suhi ponvi 3-4 minute na vsaki strani.",
+      "Dodaj paradižnikovo omako in kuhaj pokrito 10-15 minut.",
+    ],
+    tip: "Ovseni kosmiči namesto prezganega kruha — čufti so bolj mehki in imajo več beljakovin.",
+    why: "38g beljakovin v domačem obroku. Ovseni kosmiči v čuftih so skrivnost ki jo babice že poznajo."
+  },
+  {
+    id: 24,
+    name: "Govedina s sladkim krompirjem",
+    emoji: "🥩",
+    cat: ["slano"],
+    tags: ["protein", "savory"],
+    time: "30 min",
+    base: { kcal: 579, prot: 53, carbs: 47, fat: 21 },
+    ingredients: [
+      { name: "Goveje stegno (pusto)", amount: 180, unit: "g", kcalPer100: 158, protPer100: 26, carbsPer100: 0, fatPer100: 6 },
+      { name: "Sladki krompir", amount: 200, unit: "g", kcalPer100: 86, protPer100: 1.6, carbsPer100: 20, fatPer100: 0.1 },
+      { name: "Brokoli", amount: 100, unit: "g", kcalPer100: 34, protPer100: 2.8, carbsPer100: 7, fatPer100: 0.4 },
+      { name: "Olivno olje", amount: 10, unit: "ml", kcalPer100: 884, protPer100: 0, carbsPer100: 0, fatPer100: 100 },
+      { name: "Česen", amount: 2, unit: "kos", kcalPer100: 149, protPer100: 6, carbsPer100: 33, fatPer100: 0.5 },
+    ],
+    steps: [
+      "Sladki krompir nareži na kocke, začini z olivnim oljem, soljo in papriko. Peci v pečici na 200°C 20 minut.",
+      "Govedino nareži na trakove in začini s soljo, poprom in česnom.",
+      "Peci na suhi ponvi na visoki temperaturi 3-4 minute na vsaki strani.",
+      "Brokoli kuhaj v sopari 5 minut ali peci z krompirjem zadnjih 10 minut.",
+      "Serviraj skupaj — meso na vrhu zelenjave.",
+    ],
+    tip: "Sladki krompir nareži na enako velike kose da se enakomerno spečejo. Manjši kosi = bolj hrustljavi.",
+    why: "Govedina daje železo in visoko kakovostne beljakovine. Sladki krompir je polnilen vir počasnih ogljikovih hidratov z beta karotenom."
+  },
+  {
+    id: 25,
+    name: "Proteinski puding z oreški",
+    emoji: "🍮",
+    cat: ["sladko", "hitro"],
+    tags: ["protein", "sweet", "quick"],
+    time: "5 min + 2h hlajenje",
+    base: { kcal: 310, prot: 28, carbs: 24, fat: 12 },
+    ingredients: [
+      { name: "Skyr (navaden)", amount: 200, unit: "g", kcalPer100: 63, protPer100: 11, carbsPer100: 4, fatPer100: 0.2 },
+      { name: "Kakav v prahu (nesladkan)", amount: 12, unit: "g", kcalPer100: 228, protPer100: 20, carbsPer100: 10, fatPer100: 14 },
+      { name: "Med", amount: 15, unit: "g", kcalPer100: 304, protPer100: 0.3, carbsPer100: 82, fatPer100: 0 },
+      { name: "Mleko 1.5%", amount: 50, unit: "ml", kcalPer100: 46, protPer100: 3.3, carbsPer100: 4.8, fatPer100: 1.5 },
+      { name: "Mešani oreški (nesoljeni)", amount: 20, unit: "g", kcalPer100: 607, protPer100: 20, carbsPer100: 10, fatPer100: 54 },
+    ],
+    steps: [
+      "Zmešaj skyr, kakav, med in mleko dokler ni gladko in kremasto.",
+      "Vlij v kozarec ali skodelico.",
+      "Postavi v hladilnik za vsaj 2 uri — puding se zgosti.",
+      "Pred serviranjem posuj z mešanimi oreški.",
+    ],
+    tip: "Bolj ko je hladen, bolj je gost. Čez noč v hladilniku je optimalno.",
+    why: "28g beljakovin v desertu. Oreški dodajo zdrave maščobe in hrustljavost — brez njih je preveč enoličen."
+  },
+  {
+    id: 26,
+    name: "Piščanec s kuskusom in zelenjavo",
+    emoji: "🍲",
+    cat: ["slano"],
+    tags: ["protein", "savory"],
+    time: "20 min",
+    base: { kcal: 430, prot: 38, carbs: 45, fat: 10 },
+    ingredients: [
+      { name: "Piščančja prsa (surova)", amount: 150, unit: "g", kcalPer100: 165, protPer100: 31, carbsPer100: 0, fatPer100: 3.6 },
+      { name: "Kuskus", amount: 80, unit: "g", kcalPer100: 357, protPer100: 13, carbsPer100: 72, fatPer100: 0.6 },
+      { name: "Bučka", amount: 100, unit: "g", kcalPer100: 17, protPer100: 1.2, carbsPer100: 3.1, fatPer100: 0.3 },
+      { name: "Paprika", amount: 80, unit: "g", kcalPer100: 31, protPer100: 1, carbsPer100: 6, fatPer100: 0.3 },
+      { name: "Olivno olje", amount: 10, unit: "ml", kcalPer100: 884, protPer100: 0, carbsPer100: 0, fatPer100: 100 },
+      { name: "Limon", amount: 1, unit: "kos", kcalPer100: 29, protPer100: 1, carbsPer100: 9, fatPer100: 0.3 },
+    ],
+    steps: [
+      "Kuskus prelij z enako količino vrele vode, pokrij in pusti 5 minut. Rahlo zrahljaj z vilico.",
+      "Piščanca začini in peci na olivnem olju 5-6 minut na vsaki strani.",
+      "Bučko in papriko nareži in popraži na isti ponvi 4-5 minut.",
+      "Zmešaj kuskus z zelenjavo, dodaj limonin sok in olivno olje.",
+      "Postrezi piščanca na kuskusu.",
+    ],
+    tip: "Kuskus ne kuhaj — samo prelij z vrelo vodo. Kuhanje ga naredi žvečljivega.",
+    why: "Kuskus je eden najhitrejših virov ogljikovih hidratov — pripravljen v 5 minutah. Mediteranski obrok z 38g beljakovin."
+  },
+  {
+    id: 27,
+    name: "Jajca na toastu",
+    emoji: "🍳",
+    cat: ["slano", "hitro"],
+    tags: ["protein", "savory", "quick"],
+    time: "10 min",
+    base: { kcal: 340, prot: 22, carbs: 28, fat: 14 },
+    ingredients: [
+      { name: "Jajca", amount: 3, unit: "kos", kcalPer100: 155, protPer100: 13, carbsPer100: 1.1, fatPer100: 11 },
+      { name: "Polnozrnat kruh", amount: 2, unit: "kos", kcalPer100: 247, protPer100: 9, carbsPer100: 45, fatPer100: 3 },
+      { name: "Avokado", amount: 50, unit: "g", kcalPer100: 160, protPer100: 2, carbsPer100: 9, fatPer100: 15 },
+      { name: "Češnjev paradižnik", amount: 60, unit: "g", kcalPer100: 18, protPer100: 0.9, carbsPer100: 3.5, fatPer100: 0.2 },
+    ],
+    steps: [
+      "Kruh opeci v toasterju.",
+      "Jajca prepraži na suhi ponvi ali poširaj v vreli vodi 3-4 minute.",
+      "Na toast naneži zdrobljen avokado.",
+      "Na vrh položi jajca in prerezane češnjeve paradižnike.",
+      "Začini s soljo, poprom in ščepcem chilja.",
+    ],
+    tip: "Poširano jajce je boljše od preganega — brez olja, mehko rumenjak, več proteina na kalorijo.",
+    why: "Hiter zajtrk z 22g beljakovin. Avokado doda zdrave maščobe ki te nasitijo do kosila."
+  },
+  {
+    id: 28,
+    name: "Rice bowl z jajci in zelenjavo",
+    emoji: "🍚",
+    cat: ["slano"],
+    tags: ["protein", "savory"],
+    time: "20 min",
+    base: { kcal: 420, prot: 24, carbs: 52, fat: 12 },
+    ingredients: [
+      { name: "Beli riž (surov)", amount: 80, unit: "g", kcalPer100: 365, protPer100: 7.1, carbsPer100: 80, fatPer100: 0.7 },
+      { name: "Jajca", amount: 2, unit: "kos", kcalPer100: 143, protPer100: 13, carbsPer100: 1, fatPer100: 10 },
+      { name: "Špinača", amount: 80, unit: "g", kcalPer100: 23, protPer100: 2.9, carbsPer100: 3.6, fatPer100: 0.4 },
+      { name: "Korenje", amount: 60, unit: "g", kcalPer100: 41, protPer100: 0.9, carbsPer100: 10, fatPer100: 0.2 },
+      { name: "Sojina omaka (nizko soli)", amount: 15, unit: "ml", kcalPer100: 53, protPer100: 8, carbsPer100: 5, fatPer100: 0 },
+      { name: "Sezamovo olje", amount: 5, unit: "ml", kcalPer100: 884, protPer100: 0, carbsPer100: 0, fatPer100: 100 },
+    ],
+    steps: [
+      "Riž skuhaj po navodilih — 1 del riža, 2 dela vode, 15 minut.",
+      "Korenje nareži na julienne in popraži na sezamovem olju 3 minute.",
+      "Dodaj špinačo in popraži še 2 minuti.",
+      "Jajca prepraži na suhi ponvi — rumenjak pusti malo tekoč.",
+      "V skledo daj riž, zelenjavo in jajca. Prelij s sojino omako.",
+    ],
+    tip: "Sezamovo olje dodaj na koncu ne med kuhanjem — visoka temperatura uniči okus.",
+    why: "Azijski bowl z vsemi makrohranili. Sojina omaka doda umami brez veliko kalorij."
+  },
+  {
+    id: 29,
+    name: "Karbonara light verzija",
+    emoji: "🍝",
+    cat: ["slano"],
+    tags: ["protein", "savory"],
+    time: "20 min",
+    base: { kcal: 741, prot: 73, carbs: 57, fat: 23 },
+    ingredients: [
+      { name: "Polnozrnate testenine (špageti)", amount: 80, unit: "g", kcalPer100: 352, protPer100: 13, carbsPer100: 67, fatPer100: 2 },
+      { name: "Piščančja prsa (narezana na kocke)", amount: 120, unit: "g", kcalPer100: 120, protPer100: 23, carbsPer100: 0, fatPer100: 2.6 },
+      { name: "Jajca", amount: 2, unit: "kos", kcalPer100: 143, protPer100: 13, carbsPer100: 1, fatPer100: 10 },
+      { name: "Parmezan (nariban)", amount: 20, unit: "g", kcalPer100: 392, protPer100: 36, carbsPer100: 0, fatPer100: 26 },
+      { name: "Grški jogurt 0%", amount: 40, unit: "g", kcalPer100: 57, protPer100: 10, carbsPer100: 3.5, fatPer100: 0.4 },
+      { name: "Česen", amount: 2, unit: "kos", kcalPer100: 149, protPer100: 6, carbsPer100: 33, fatPer100: 0.5 },
+    ],
+    steps: [
+      "Testenine skuhaj al dente — shrani 50ml vode od kuhanja.",
+      "Piščanca popraži na suhi ponvi z česnom 5-6 minut.",
+      "Zmešaj jajca, parmezan in jogurt v gladko omako.",
+      "Testenine odcedi in takoj zmešaj z jajčno omako — toplota testenin skuha jajca.",
+      "Dodaj vodo od kuhanja za kremastost, dodaj piščanca.",
+    ],
+    tip: "Skrivnost prave karbomare je temperatura — testenine morajo biti vroče ampak ne na ognju ko dodaš jajca. Sicer dobiš jajčnico.",
+    why: "Karbonara brez slanine in smetane. Jogurt zamenja smetano, piščanec zamenja slanino. 36g beljakovin, klasičen okus."
+  },
+];
+
+let currentFilter = 'vse';
+let targetMacros = null;
+let openRecipeId = null;
+
+function filterCat(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRecipes();
+}
+
+const countableItems = ['jajca', 'jajce', 'tortila', 'tortile', 'riževi kolački', 'rižev kolacek'];
+
+function roundIngredient(ing, scale) {
+  const raw = ing.amount * scale;
+  const isCountable = ing.unit === 'kos' || countableItems.some(c => ing.name.toLowerCase().includes(c));
+  if (isCountable) return Math.max(1, Math.ceil(raw)) + ' ' + ing.unit;
+  if (ing.unit === 'ml' || ing.unit === 'g') return Math.max(5, Math.round(raw / 5) * 5) + ' ' + ing.unit;
+  return Math.max(1, Math.round(raw)) + ' ' + ing.unit;
+}
+
+function getScaleFactor(recipe) {
+  if (!targetMacros) return 1;
+  const { kcal, prot, carbs, fat } = targetMacros;
+
+  // 1. KALORIJE so prioriteta — vedno skaliramo na kcal
+  let scale = 1;
+  if (kcal > 0) {
+    scale = kcal / recipe.base.kcal;
+  } else {
+    // Če ni kcal, uporabi makre kot vodilo
+    const factors = [];
+    if (prot > 0) factors.push(prot / recipe.base.prot);
+    if (carbs > 0) factors.push(carbs / recipe.base.carbs);
+    if (fat > 0) factors.push(fat / recipe.base.fat);
+    if (factors.length > 0) {
+      factors.sort((a, b) => a - b);
+      scale = factors[Math.floor(factors.length / 2)];
+    }
+  }
+
+  // 2. Omeji na razumno območje (30% - 300% osnovne porcije)
+  return Math.max(0.3, Math.min(6, scale));
+}
+
+function getMatchScore(recipe) {
+  if (!targetMacros) return 100;
+  const scale = getScaleFactor(recipe);
+  const scaled = {
+    kcal: recipe.base.kcal * scale,
+    prot: recipe.base.prot * scale,
+    carbs: recipe.base.carbs * scale,
+    fat: recipe.base.fat * scale,
+  };
+
+  let score = 100;
+  // Kalorije so najpomembnejše (50% teže)
+  if (targetMacros.kcal > 0) {
+    const kcalDiff = Math.abs(scaled.kcal - targetMacros.kcal) / targetMacros.kcal;
+    score -= kcalDiff * 50;
+  }
+  // Beljakovine so drugi prioriteta (30% teže)
+  if (targetMacros.prot > 0) {
+    const protDiff = Math.abs(scaled.prot - targetMacros.prot) / targetMacros.prot;
+    score -= protDiff * 30;
+  }
+  // OH in maščobe so manj pomembni (10% vsak)
+  if (targetMacros.carbs > 0) {
+    const carbsDiff = Math.abs(scaled.carbs - targetMacros.carbs) / targetMacros.carbs;
+    score -= carbsDiff * 10;
+  }
+  if (targetMacros.fat > 0) {
+    const fatDiff = Math.abs(scaled.fat - targetMacros.fat) / targetMacros.fat;
+    score -= fatDiff * 10;
+  }
+  return Math.max(0, Math.round(score));
+}
+
+function getWarning(recipe) {
+  if (!targetMacros) return null;
+  const scale = getScaleFactor(recipe);
+  const scaled = { prot: recipe.base.prot * scale };
+  const warnings = [];
+  if (scale < 0.4) warnings.push("Zelo majhna porcija za te kalorije.");
+  if (scale > 2.5) warnings.push("Zelo velika porcija — prilagojena na maksimum.");
+  if (targetMacros.prot > 0 && scaled.prot < targetMacros.prot * 0.6) {
+    warnings.push(`Pri ${Math.round(targetMacros.kcal || recipe.base.kcal * scale)} kcal ta recept da le ${Math.round(scaled.prot)}g beljakovin — izberi 🟢 visoko beljakovinski recept.`);
+  }
+  return warnings.length > 0 ? '⚠️ ' + warnings.join(' ') : null;
+}
+
+function getMatchScore(recipe) {
+  if (!targetMacros) return 100;
+  const scale = getScaleFactor(recipe);
+  const scaled = {
+    kcal: recipe.base.kcal * scale,
+    prot: recipe.base.prot * scale,
+    carbs: recipe.base.carbs * scale,
+    fat: recipe.base.fat * scale,
+  };
+  let score = 100;
+  if (targetMacros.kcal > 0) score -= Math.abs(scaled.kcal - targetMacros.kcal) / targetMacros.kcal * 30;
+  if (targetMacros.prot > 0) score -= Math.abs(scaled.prot - targetMacros.prot) / targetMacros.prot * 30;
+  return Math.max(0, Math.round(score));
+}
+
+function findRecipes() {
+  const kcal = parseFloat(document.getElementById('in-kcal').value) || 0;
+  const prot = parseFloat(document.getElementById('in-prot').value) || 0;
+  const carbs = parseFloat(document.getElementById('in-carbs').value) || 0;
+  const fat = parseFloat(document.getElementById('in-fat').value) || 0;
+  if (kcal === 0 && prot === 0 && carbs === 0 && fat === 0) {
+    targetMacros = null;
+  } else {
+    targetMacros = { kcal, prot, carbs, fat };
+  }
+  renderRecipes();
+}
+
+function renderRecipes() {
+  const grid = document.getElementById('recipes-grid');
+  let filtered = currentFilter === 'vse' ? recipes :
+    currentFilter === 'protein' ? recipes.filter(r => (r.base.prot * 4 / r.base.kcal * 100) >= 25) :
+    recipes.filter(r => r.cat.includes(currentFilter));
+  if (targetMacros) {
+    filtered = [...filtered].sort((a, b) => getMatchScore(b) - getMatchScore(a));
+  }
+  grid.innerHTML = '';
+  filtered.forEach(recipe => {
+    const scale = getScaleFactor(recipe);
+    const scaled = {
+      kcal: Math.round(recipe.base.kcal * scale),
+      prot: Math.round(recipe.base.prot * scale),
+      carbs: Math.round(recipe.base.carbs * scale),
+      fat: Math.round(recipe.base.fat * scale),
+    };
+    const match = getMatchScore(recipe);
+    const isAdjusted = targetMacros && Math.abs(scale - 1) > 0.05;
+    const tagMap = { protein: ['tag-protein', 'Visoko beljakovinski'], quick: ['tag-quick', 'Hitro'], sweet: ['tag-sweet', 'Sladko'], savory: ['tag-savory', 'Slano'] };
+    const tagsHtml = recipe.tags.map(t => `<span class="tag ${tagMap[t][0]}">${tagMap[t][1]}</span>`).join('');
+    // Protein badge
+    const protBadge = scaled.prot >= 20 ? '🟢' : scaled.prot >= 12 ? '🟡' : '🔴';
+    // Warning if protein goal unreachable
+    const maxProt = recipe.base.prot * 3;
+    const protWarn = (targetMacros && targetMacros.prot > 0 && targetMacros.prot > maxProt) 
+      ? `<div style="font-size:11px;color:var(--coral);margin-top:4px;">⚠️ Max ${Math.round(maxProt)}g beljakovin pri razumni porciji</div>` : '';
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    card.innerHTML = `
+      <div class="recipe-header">
+        <div class="recipe-emoji">${recipe.emoji}</div>
+        <div class="recipe-info">
+          <div class="recipe-name">${protBadge} ${recipe.name}</div>
+          <div class="recipe-sub">⏱ ${recipe.time}</div>
+          <div class="recipe-tags">${tagsHtml}</div>
+          ${protWarn}
+        </div>
+      </div>
+      <div class="recipe-macros">
+        <div class="macro-pill"><span class="macro-pill-val">${scaled.kcal}</span><span class="macro-pill-label">kcal</span></div>
+        <div class="macro-pill"><span class="macro-pill-val" style="color:var(--accent)">${scaled.prot}g</span><span class="macro-pill-label">belj.</span></div>
+        <div class="macro-pill"><span class="macro-pill-val" style="color:var(--blue)">${scaled.carbs}g</span><span class="macro-pill-label">oh</span></div>
+        <div class="macro-pill"><span class="macro-pill-val" style="color:var(--accent2)">${scaled.fat}g</span><span class="macro-pill-label">maš.</span></div>
+      </div>
+      ${targetMacros ? `<div class="match-indicator show">✓ ${match}% ujemanje • ${isAdjusted ? 'količine prilagojene' : 'osnovna porcija'}</div>` : ''}
+    `;
+    card.onclick = () => openRecipe(recipe.id);
+    grid.appendChild(card);
+  });
+}
+
+function openRecipe(id) {
+  const recipe = recipes.find(r => r.id === id);
+  openRecipeId = id;
+  const scale = getScaleFactor(recipe);
+  const scaled = {
+    kcal: Math.round(recipe.base.kcal * scale),
+    prot: Math.round(recipe.base.prot * scale),
+    carbs: Math.round(recipe.base.carbs * scale),
+    fat: Math.round(recipe.base.fat * scale),
+  };
+  const isAdjusted = targetMacros && Math.abs(scale - 1) > 0.05;
+  let ingredientsHtml = recipe.ingredients.map(ing => {
+    const amount = roundIngredient(ing, scale);
+    return `<div class="ingredient-row"><span class="ingredient-name">${ing.name}</span><span class="ingredient-amount">${amount}</span></div>`;
+  }).join('');
+  
+  const warning = getWarning(recipe);
+  const warningHtml = warning ? `<div style="background:rgba(240,144,96,0.08);border:0.5px solid rgba(240,144,96,0.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--coral);margin-bottom:14px;">${warning}</div>` : '';
+  let stepsHtml = recipe.steps.map((s, i) => `<li class="step-item"><span class="step-num">${i+1}</span><span>${s}</span></li>`).join('');
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-emoji">${recipe.emoji}</div>
+      <div>
+        <div class="modal-title">${recipe.name}</div>
+        <div class="modal-sub">⏱ ${recipe.time}</div>
+      </div>
+    </div>
+    ${isAdjusted ? `<div class="adjusted-badge">⚡ Količine prilagojene tvojim makrom</div>` : ''}
+    ${warningHtml}
+    <div class="modal-macros">
+      <div class="modal-macro"><span class="modal-macro-val">${scaled.kcal}</span><span class="modal-macro-label">kcal</span></div>
+      <div class="modal-macro"><span class="modal-macro-val" style="color:var(--accent)">${scaled.prot}g</span><span class="modal-macro-label">belj.</span></div>
+      <div class="modal-macro"><span class="modal-macro-val" style="color:var(--blue)">${scaled.carbs}g</span><span class="modal-macro-label">OH</span></div>
+      <div class="modal-macro"><span class="modal-macro-val" style="color:var(--accent2)">${scaled.fat}g</span><span class="modal-macro-label">maš.</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-title" style="margin-bottom:10px">Sestavine</div>
+    ${ingredientsHtml}
+    <div class="divider"></div>
+    <div class="section-title" style="margin-bottom:10px">Postopek</div>
+    <ul class="steps-list">${stepsHtml}</ul>
+    <div class="tip-box"><strong>💡 Pro tip:</strong> ${recipe.tip}<br><br><strong>Zakaj je to zdravo:</strong> ${recipe.why}</div>
+    <button class="close-btn" onclick="closeModal()">Zapri ✕</button>
+  `;
+  document.getElementById('modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+}
+
+renderRecipes();
+</script>
+</body>
+</html>
