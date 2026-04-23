@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fit Lab — Dodatki</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f0e;--s1:#1a1a18;--s2:#232320;--b:#2e2e2a;
+  --ac:#c8f060;--ac2:#60f0a8;--txt:#f0ede6;--t2:#b8b5a8;--t3:#888070;
+  --blue:#60c8f0;--coral:#f09060;--red:#f06060;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 80px}
+.wrap{max-width:520px;margin:0 auto}
+
+.logo{font-family:'DM Mono',monospace;font-size:11px;color:var(--ac);letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ac);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+h1{font-size:26px;font-weight:500;margin-bottom:6px}
+h1 span{color:var(--ac)}
+.sub{font-size:13px;color:var(--t2);margin-bottom:22px;line-height:1.6}
+
+/* Tabs */
+.tabs{display:flex;gap:0;background:var(--s1);border:.5px solid var(--b);border-radius:10px;padding:4px;margin-bottom:16px}
+.tab{flex:1;padding:9px 6px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;color:var(--t3);user-select:none;display:flex;align-items:center;justify-content:center;gap:5px}
+.tab.active-osnovno{background:var(--ac);color:#0f0f0e}
+.tab.active-opcijsko{background:#f0c060;color:#0f0f0e}
+.tab.active-neuporabno{background:var(--red);color:#fff}
+
+/* Cards */
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--s1);border:.5px solid var(--b);border-radius:14px;overflow:hidden;transition:all .2s}
+
+.card-header{padding:14px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer}
+.card-emoji{font-size:22px;flex-shrink:0;width:36px;text-align:center;margin-top:1px}
+.card-info{flex:1}
+.card-name{font-size:15px;font-weight:500;color:var(--txt);margin-bottom:2px}
+.card-purpose{font-size:12px;color:var(--t2)}
+.card-badge{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;font-family:'DM Mono',monospace}
+.badge-yes{background:rgba(200,240,96,.1);color:var(--ac);border:.5px solid rgba(200,240,96,.3)}
+.badge-maybe{background:rgba(240,192,96,.1);color:#f0c060;border:.5px solid rgba(240,192,96,.3)}
+.badge-no{background:rgba(240,96,96,.1);color:var(--red);border:.5px solid rgba(240,96,96,.3)}
+
+.card-body{display:none;padding:0 16px 14px;border-top:.5px solid var(--b);margin-top:0}
+.card-body.open{display:block}
+
+.info-row{display:flex;gap:8px;padding:8px 0;border-bottom:.5px solid var(--b);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-icon{font-size:14px;flex-shrink:0;width:20px}
+.info-label{color:var(--t3);min-width:80px;flex-shrink:0;font-size:12px}
+.info-val{color:var(--t2);flex:1;line-height:1.4}
+.info-val strong{color:var(--txt)}
+
+.effectiveness-bar{display:flex;gap:3px;margin-top:4px}
+.eff-dot{width:18px;height:6px;border-radius:3px;background:var(--s2)}
+.eff-dot.filled-green{background:var(--ac)}
+.eff-dot.filled-yellow{background:#f0c060}
+.eff-dot.filled-red{background:var(--red)}
+
+.tip-box{background:rgba(200,240,96,.05);border:.5px solid rgba(200,240,96,.15);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--t2);line-height:1.5;margin-top:10px}
+.tip-box strong{color:var(--ac)}
+
+.chevron{font-size:12px;color:var(--t3);margin-top:2px;transition:transform .2s}
+.chevron.open{transform:rotate(180deg)}
+
+.empty{text-align:center;padding:40px 20px;color:var(--t3);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="logo"><div class="dot"></div>Fit Lab — Dodatki</div>
+<h1>Kateri dodatki <span>res delajo</span></h1>
+<p class="sub">Izberi kategorijo — vsak dodatek ocenjen po učinkovitosti, namenu in ceni. Brez marketinškega BS-a.</p>
+
+<div class="tabs" style="flex-wrap:wrap;gap:4px">
+  <div class="tab active-osnovno" onclick="switchTab('osnovno',this)" id="tab-osnovno" style="min-width:calc(50% - 4px)">✅ Osnovno</div>
+  <div class="tab" onclick="switchTab('opcijsko',this)" id="tab-opcijsko" style="min-width:calc(50% - 4px)">🟡 Opcijsko</div>
+  <div class="tab" onclick="switchTab('performance',this)" id="tab-performance" style="min-width:calc(50% - 4px)">⚡ Performance</div>
+  <div class="tab" onclick="switchTab('neuporabno',this)" id="tab-neuporabno" style="min-width:calc(50% - 4px)">❌ Neuporabno</div>
+</div>
+
+<div class="cards" id="cards-container"></div>
+
+</div>
+
+<script>
+const supplements = {
+  osnovno: [
+    {
+      emoji: '💪',
+      name: 'Kreatin monohidrat',
+      purpose: 'Moč, eksplozivnost, mišična masa',
+      badge: 'DA',
+      badgeClass: 'badge-yes',
+      effectiveness: 5,
+      effectivenessColor: 'green',
+      when: 'Vsak dan — čas ni pomemben',
+      dose: '0.1g na kg telesne teže na dan (npr. 80kg = 8g)',
+      price: '5-8€ / mesec',
+      note: 'Najbolj raziskan prehranski dodatek na svetu. Poveča fosfokreatin v mišicah kar neposredno vpliva na moč in eksplozivnost.',
+      tip: '💡 Ne nasedaj dragim oblikam kot so HCl ali matrix — to je samo marketing. Navaden monohidrat v prahu, ~500g za 10€, zadostuje za 3 mesece.',
+    },
+    {
+      emoji: '☀️',
+      name: 'Vitamin D3 + K2',
+      purpose: 'Hormoni, imunski sistem, kosti, testosteron',
+      badge: 'DA',
+      badgeClass: 'badge-yes',
+      effectiveness: 4,
+      effectivenessColor: 'green',
+      when: 'Zjutraj z obrokom ki vsebuje maščobe',
+      dose: '2000-4000 IU D3 + 100mcg K2 MK-7',
+      price: '5-10€ / mesec',
+      note: 'Vitamin D3 je eden najpogostejših pomanjkljivih vitaminov — večina ljudi ga ima premalo ne glede na letni čas. Vpliva na testosteron, imunski sistem, razpoloženje in kostno gostoto. K2 poskrbi da kalcij gre v kosti in ne v žile.',
+      tip: '💡 Priporočam zraven K2 — ta poskrbi da kalcij res gre v kosti in ne v žile. Vzemi z obrokom ki vsebuje maščobe.',
+    },
+    {
+      emoji: '😴',
+      name: 'Magnezij',
+      purpose: 'Spanec, regeneracija, živčni sistem, krči',
+      badge: 'DA',
+      badgeClass: 'badge-yes',
+      effectiveness: 4,
+      effectivenessColor: 'green',
+      when: 'Zvečer, 30-60 min pred spanjem',
+      dose: '300-400mg magnezij glicinata ali malata',
+      price: '8-15€ / mesec',
+      note: 'Večina odraslih ima premalo magnezija zaradi predelane hrane in stresa. Izboljša kakovost spanja, zmanjša mišične krče in podpira regeneracijo. Ključen mineral za 300+ encimskih reakcij v telesu.',
+      tip: '💡 Najcenejši magnezij (oksid) v bistvu ne deluje — telo ga skoraj ne absorbira. Vzemi glicinat ali malat, sta par evrov dražja ampak se res pozna.',
+    },
+    {
+      emoji: '🐟',
+      name: 'Omega-3 (ribje olje)',
+      purpose: 'Regeneracija, srce, možgani, vnetja',
+      badge: 'DA',
+      badgeClass: 'badge-yes',
+      effectiveness: 4,
+      effectivenessColor: 'green',
+      when: 'Z obrokom, zjutraj ali zvečer',
+      dose: '2-3g EPA+DHA na dan',
+      price: '10-20€ / mesec',
+      note: 'Zmanjšuje vnetja ki nastanejo po intenzivnem treningu, podpira srčno-žilno zdravje in delovanje možganov. Posebej koristno če ne ješ mastnih rib vsaj 2-3x na teden.',
+      tip: '💡 Na embalaži piše npr. 1000mg — to je skupaj olje, ne omega-3. Poglej EPA+DHA posebej, to je tisto kar šteje. Vsaj 500mg na kapsulo.',
+    },
+  ],
+  opcijsko: [
+    {
+      emoji: '🥛',
+      name: 'Proteinski prašek (Whey)',
+      purpose: 'Beljakovine, mišična masa',
+      badge: 'ODVISNO',
+      badgeClass: 'badge-maybe',
+      effectiveness: 4,
+      effectivenessColor: 'yellow',
+      when: 'Kadarkoli — ni magičnega časa',
+      dose: '1-2 odmerka na dan (20-30g beljakovin)',
+      price: '20-35€ / mesec',
+      note: 'Rabiš ga SAMO če ne dosežeš dnevnega cilja beljakovin iz hrane. Whey je samo hrana v prahu. Koncentrat je cenejši, izolat boljši za laktozno intoleranco.',
+      tip: '💡 Najprej poglej kaj ješ čez dan. Če dosežeš beljakovine iz hrane, ga ne rabiš. Whey je samo hitra opcija ko nimaš časa kuhati.',
+    },
+    {
+      emoji: '🔩',
+      name: 'Cink',
+      purpose: 'Testosteron, imunski sistem, regeneracija',
+      badge: 'ODVISNO',
+      badgeClass: 'badge-maybe',
+      effectiveness: 3,
+      effectivenessColor: 'yellow',
+      when: 'Zvečer ali z obrokom',
+      dose: '15-25mg cinkovega bisglicina ali glukonata',
+      price: '5-10€ / mesec',
+      note: 'Cink je ključen za produkcijo testosterona in delovanje imunskega sistema. Pomanjkanje je pogosto pri tistih ki trenirajo — cink se izgublja z znojem.',
+      tip: '💡 Ne pretiravaj s količino — preveč cinka dolgoročno škodi. Vzemi zvečer z obrokom, bisglicinat je najboljša oblika.',
+    },
+    {
+      emoji: '😴',
+      name: 'Ashwagandha',
+      purpose: 'Stres, kortizol, spanec, testosteron',
+      badge: 'ODVISNO',
+      badgeClass: 'badge-maybe',
+      effectiveness: 3,
+      effectivenessColor: 'yellow',
+      when: 'Zvečer ali 2x na dan (zjutraj + zvečer)',
+      dose: '300-600mg KSM-66 ali Sensoril ekstrakta',
+      price: '15-25€ / mesec',
+      note: 'Adaptogen ki zmanjšuje kortizol in podpira telo pri stresu. Deluje pri visokem stresu — ne bo ti dal energije, bo pa zmanjšal anksioznost in izboljšal spanec. Učinki vidni po 4-8 tednih.',
+      tip: '💡 Na embalaži moraš videti KSM-66 ali Sensoril — brez tega verjetno ne bo nič. Navaden koren v kapsulah je v večini primerov brez učinka.',
+    },
+
+    {
+      emoji: '🛡️',
+      name: 'L-glutamin',
+      purpose: 'Regeneracija, imunski sistem, črevesje',
+      badge: 'ODVISNO',
+      badgeClass: 'badge-maybe',
+      effectiveness: 3,
+      effectivenessColor: 'yellow',
+      when: 'Zjutraj na prazen želodec ali po treningu',
+      dose: '5-10g na dan',
+      price: '8-15€ / mesec',
+      note: 'Najpogostejša aminokislina v telesu. Podpira zdravje črevesja, imunski sistem in zmanjšuje mišično bolečino po treningu. Zjutraj na prazen želodec deluje najbolje za prebavo, po treningu za regeneracijo mišic.',
+      tip: '💡 Ni nujno potreben za vsakogar. Najbolj se pozna pri tistih ki imajo težave s prebavo ali trenirajo z visokim volumnom.',
+    },
+  ],
+  performance: [
+    {
+      emoji: '💊',
+      name: 'Pre-workout',
+      purpose: 'Energija, fokus, vzdržljivost',
+      badge: 'ODVISNO',
+      badgeClass: 'badge-maybe',
+      effectiveness: 2,
+      effectivenessColor: 'yellow',
+      when: '20-30 min pred treningom',
+      dose: '1 odmerek po navodilih',
+      price: '30-50€ / mesec',
+      note: 'Pre-workout ni čarobna pijača — aktivni sestavini sta kofein in beta-alanin. Vse ostalo so barvila, arome in marketinška imena.',
+      tip: '💡 Ne ga vzeti vsak trening — telo se hitro navadi in učinek zbledi. Pusti ga za treninge ko res rabiš dodaten zagon.',
+    },
+    {
+      emoji: '⚡',
+      name: 'Kofein',
+      purpose: 'Energija, fokus, vzdržljivost, moč',
+      badge: 'DA',
+      badgeClass: 'badge-yes',
+      effectiveness: 4,
+      effectivenessColor: 'green',
+      when: '30-60 min pred treningom, ne po 15:00',
+      dose: '100-200mg (1-2 kavi ali tableta)',
+      price: '0-5€ / mesec',
+      note: 'Ena izmed najbolj raziskanih ergogenih snovi. Dokazano izboljša moč, vzdržljivost in fokus. Telo se hitro navadi — če ga jemlješ vsak dan pred treningom učinek sčasoma zbledi.',
+      tip: '💡 Preden kupiš karkoli — kava naredi enako. Za enak učinek brez stroškov.',
+    },
+    {
+      emoji: '🔬',
+      name: 'Beta-alanin',
+      purpose: 'Vzdržljivost, odložitev utrujenosti',
+      badge: 'ODVISNO',
+      badgeClass: 'badge-maybe',
+      effectiveness: 3,
+      effectivenessColor: 'yellow',
+      when: 'Pred treningom ali razporejeno čez dan',
+      dose: '3.2-6.4g na dan (v manjših odmerkih)',
+      price: '8-15€ / mesec',
+      note: 'Povečuje karnosin v mišicah ki nevtralizira kislino med visoko intenzivnim treningom. Koristno za trening z visokimi ponovitvami ali interval trening. Povzroča mravljinčenje — normalno in neškodljivo.',
+      tip: '💡 Mravljinčenje ki ga povzroča je normalno in neškodljivo — samo neprijetno. Vzemi v manjših odmerkih čez dan da ga zmanjšaš.',
+    },
+    {
+      emoji: '🍃',
+      name: 'L-citrullin',
+      purpose: 'Črpanje krvi, zmogljivost, regeneracija',
+      badge: 'ODVISNO',
+      badgeClass: 'badge-maybe',
+      effectiveness: 3,
+      effectivenessColor: 'yellow',
+      when: '30-60 min pred treningom',
+      dose: '6-8g L-citrulina malata',
+      price: '10-20€ / mesec',
+      note: 'Povečuje pretok krvi v mišice med treningom — odgovoren za "pump" občutek. Nekatere študije kažejo na zmanjšano utrujenost in boljšo regeneracijo. Bolj koristen za napredne.',
+      tip: '💡 Večina pre-workout formulacij ga vsebuje — ampak premalo. Če ga jemlješ posebej imaš nadzor nad odmerkom in brez nepotrebnih dodatkov.',
+    } ],
+  neuporabno: [
+    {
+      emoji: '🔥',
+      name: 'Fat burnerji',
+      purpose: 'Hujšanje',
+      badge: 'NE',
+      badgeClass: 'badge-no',
+      effectiveness: 1,
+      effectivenessColor: 'red',
+      when: '—',
+      dose: '—',
+      price: '30-60€ / mesec (izgubljen denar)',
+      note: 'Ne delajo. Aktivna sestavina je kofein ki ga dobiš za cent. Vse ostalo je marketing. Edini fat burner je kalorijski deficit — porabiti več kalorij kot jih zaužiješ.',
+      tip: '❌ Za 40€ fat burnerja kupiš kreatin za 4 mesece. Kreatin deluje, fat burner ne. Izbira je lahka.',
+    },
+    {
+      emoji: '💉',
+      name: 'Testo boosterji',
+      purpose: 'Testosteron, mišična masa',
+      badge: 'NE',
+      badgeClass: 'badge-no',
+      effectiveness: 1,
+      effectivenessColor: 'red',
+      when: '—',
+      dose: '—',
+      price: '30-80€ / mesec (izgubljen denar)',
+      note: 'Klinično dokazana učinkovitost je minimalna oziroma je ni. Testosteron naravno dviguješ z: 8h spanca, treningom z utežmi, vitaminom D3, cinkom in zmanjšanim stresom.',
+      tip: '❌ Hočeš višji testosteron? Spi 8h, treniraj z utežmi, vzemi D3 in cink. To deluje. Testo booster ne.',
+    },
+    {
+      emoji: '🧪',
+      name: 'BCAA',
+      purpose: 'Mišična masa, regeneracija',
+      badge: 'NE',
+      badgeClass: 'badge-no',
+      effectiveness: 1,
+      effectivenessColor: 'red',
+      when: '—',
+      dose: '—',
+      price: '20-40€ / mesec (izgubljen denar)',
+      note: 'Popolnoma neuporabni če ješ dovolj beljakovin. BCAA (levcin, izolevcin, valin) so del vsakega proteina v hrani. Plačuješ za 3 aminokisline ki jih že imaš v vsakem obroku.',
+      tip: '❌ Pojej skyr ali jajca. Dobiš enako ali več za 10x manj denarja.',
+    },
+
+    {
+      emoji: '🌿',
+      name: 'Multivitamini',
+      purpose: 'Splošno zdravje',
+      badge: 'NE',
+      badgeClass: 'badge-no',
+      effectiveness: 2,
+      effectivenessColor: 'red',
+      when: '—',
+      dose: '—',
+      price: '10-30€ / mesec',
+      note: 'Če ješ raznoliko prehrano jih ne rabiš. V presežku se vitamini izločijo, telo ne shrani tega kar ne potrebuje. Bolje ciljati konkretne pomanjkljivosti kot jemati vse naenkrat v premajhnih odmerkih.',
+      tip: '❌ Namesto multivitamina vzemi D3, magnezij in omega-3 posebej. Ceneje in bistveno bolj učinkovito.',
+    },
+  ],
+};
+
+
+let currentTab = 'osnovno';
+let openCards = new Set();
+
+function switchTab(tab, el) {
+  currentTab = tab;
+  openCards.clear();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.className = 'tab';
+  });
+  const activeClass = tab === 'performance' ? 'active-osnovno' : `active-${tab}`;
+  el.classList.add(activeClass);
+  renderCards();
+}
+
+function toggleCard(idx) {
+  if (openCards.has(idx)) {
+    openCards.clear();
+  } else {
+    openCards.clear();
+    openCards.add(idx);
+  }
+  renderCards();
+}
+
+function renderEffectiveness(level, color) {
+  let dots = '';
+  for (let i = 1; i <= 5; i++) {
+    const filled = i <= level ? `filled-${color}` : '';
+    dots += `<div class="eff-dot ${filled}"></div>`;
+  }
+  return `<div class="effectiveness-bar">${dots}</div>`;
+}
+
+function renderCards() {
+  const items = supplements[currentTab];
+  const container = document.getElementById('cards-container');
+
+  if (!items || items.length === 0) {
+    container.innerHTML = '<div class="empty">Ni dodatkov v tej kategoriji.</div>';
+    return;
+  }
+
+  container.innerHTML = items.map((s, i) => {
+    const isOpen = openCards.has(i);
+    return `
+      <div class="card">
+        <div class="card-header" onclick="toggleCard(${i})">
+          <div class="card-emoji">${s.emoji}</div>
+          <div class="card-info">
+            <div class="card-name">${s.name}</div>
+            <div class="card-purpose">${s.purpose}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <div class="card-badge ${s.badgeClass}">${s.badge}</div>
+            <div class="chevron ${isOpen ? 'open' : ''}">▼</div>
+          </div>
+        </div>
+        <div class="card-body ${isOpen ? 'open' : ''}">
+          <div style="padding-top:12px">
+            <div class="info-row">
+              <span class="info-icon">📊</span>
+              <span class="info-label">Učinkovitost</span>
+              <span class="info-val">${renderEffectiveness(s.effectiveness, s.effectivenessColor)}</span>
+            </div>
+            ${s.when !== '—' ? `
+            <div class="info-row">
+              <span class="info-icon">⏰</span>
+              <span class="info-label">Kdaj vzeti</span>
+              <span class="info-val">${s.when}</span>
+            </div>` : ''}
+            ${s.dose !== '—' ? `
+            <div class="info-row">
+              <span class="info-icon">⚖️</span>
+              <span class="info-label">Odmerek</span>
+              <span class="info-val"><strong>${s.dose}</strong></span>
+            </div>` : ''}
+            <div class="info-row">
+              <span class="info-icon">💶</span>
+              <span class="info-label">Cena</span>
+              <span class="info-val">${s.price}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-icon">📖</span>
+              <span class="info-label">Zakaj</span>
+              <span class="info-val">${s.note}</span>
+            </div>
+            <div class="tip-box">${s.tip}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+renderCards();
+</script>
+</body>
+</html>
