@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fit Lab — Split Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f0e;--s1:#1a1a18;--s2:#232320;--b:#2e2e2a;
+  --ac:#c8f060;--ac2:#60f0a8;--txt:#f0ede6;--t2:#b8b5a8;--t3:#888070;
+  --blue:#60c8f0;--coral:#f09060;--red:#f06060;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 80px}
+.wrap{max-width:520px;margin:0 auto}
+
+.logo{font-family:'DM Mono',monospace;font-size:11px;color:var(--ac);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ac);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:24px;font-weight:500;margin-bottom:6px}
+h1 span{color:var(--ac)}
+.sub{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.5}
+
+.screen{display:none}
+.screen.active{display:block}
+
+/* Card */
+.card{background:var(--s1);border:.5px solid var(--b);border-radius:14px;padding:18px;margin-bottom:10px}
+.card-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:12px}
+
+/* Seg */
+.seg{display:flex;gap:6px}
+.seg-btn{flex:1;padding:11px 8px;border-radius:8px;border:.5px solid var(--b);background:var(--s2);color:var(--t2);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:all .15s;user-select:none;line-height:1.4}
+.seg-btn.on{border-color:var(--ac);color:var(--ac);background:rgba(200,240,96,.08)}
+
+/* Muscle rating rows */
+.muscle-grid{display:flex;flex-direction:column;gap:2px}
+.muscle-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:.5px solid var(--b)}
+.muscle-row:last-child{border-bottom:none}
+.muscle-name{flex:1;font-size:13px;color:var(--txt)}
+.muscle-dots{display:flex;gap:5px}
+.muscle-dot{width:32px;height:32px;border-radius:8px;border:.5px solid var(--b);background:var(--s2);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'DM Mono',monospace;color:var(--t3);font-weight:500}
+.muscle-dot:hover{border-color:var(--t3)}
+.dot-1.active{border-color:var(--red);background:rgba(240,96,96,.15);color:var(--red)}
+.dot-2.active{border-color:var(--coral);background:rgba(240,144,96,.12);color:var(--coral)}
+.dot-3.active{border-color:var(--blue);background:rgba(96,200,240,.12);color:var(--blue)}
+.dot-4.active{border-color:var(--ac2);background:rgba(96,240,168,.12);color:var(--ac2)}
+.dot-5.active{border-color:var(--ac);background:rgba(200,240,96,.12);color:var(--ac)}
+.muscle-badge{font-size:10px;font-family:'DM Mono',monospace;min-width:16px;text-align:right;color:var(--t3)}
+.muscle-badge.pri1{color:var(--red)}
+.muscle-badge.pri2{color:var(--coral)}
+
+/* Tip box */
+.tip{background:rgba(200,240,96,.05);border:.5px solid rgba(200,240,96,.2);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:10px}
+.tip strong{color:var(--ac)}
+.tip.warn{background:rgba(240,96,96,.05);border-color:rgba(240,96,96,.2)}
+.tip.warn strong{color:var(--red)}
+
+/* Buttons */
+.btn-primary{width:100%;padding:14px;border-radius:10px;border:none;background:var(--ac);color:#0f0f0e;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;margin-top:4px}
+.btn-primary:hover{background:#d4f570}
+.btn-secondary{width:100%;padding:12px;border-radius:10px;border:.5px solid var(--b);background:transparent;color:var(--t2);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:8px}
+
+/* Output */
+.split-header{background:var(--s1);border:.5px solid var(--b);border-radius:14px;padding:18px;margin-bottom:10px}
+.split-name{font-size:20px;font-weight:500;margin-bottom:4px}
+.split-sub{font-size:13px;color:var(--t2);margin-bottom:14px}
+.split-stats{display:flex;gap:8px}
+.sstat{flex:1;background:var(--s2);border-radius:8px;padding:10px;text-align:center}
+.sstat-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--ac);line-height:1;margin-bottom:3px}
+.sstat-label{font-size:10px;color:var(--t3)}
+
+/* Week schedule */
+.week-schedule{background:var(--s1);border:.5px solid var(--b);border-radius:14px;overflow:hidden;margin-bottom:10px}
+.week-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:.5px solid var(--b)}
+.week-row:last-child{border-bottom:none}
+.week-day{font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);min-width:28px;flex-shrink:0}
+.week-label{flex:1}
+.week-name{font-size:13px;font-weight:500;color:var(--txt);margin-bottom:2px}
+.week-desc{font-size:11px;color:var(--t3)}
+.week-badge{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:4px}
+.badge-train{background:rgba(200,240,96,.1);color:var(--ac);border:.5px solid rgba(200,240,96,.3)}
+.badge-rest{background:rgba(96,200,240,.08);color:var(--blue);border:.5px solid rgba(96,200,240,.2)}
+
+/* Volume table */
+.vol-table{background:var(--s1);border:.5px solid var(--b);border-radius:14px;overflow:hidden;margin-bottom:10px}
+.vol-header{padding:12px 16px;border-bottom:.5px solid var(--b);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);display:flex;gap:8px}
+.vol-row{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:.5px solid var(--b)}
+.vol-row:last-child{border-bottom:none}
+.vol-muscle{flex:1;font-size:13px;color:var(--txt)}
+.vol-sets{font-family:'DM Mono',monospace;font-size:12px;min-width:80px}
+.vol-sets.weak{color:var(--red)}
+.vol-sets.strong{color:var(--t2)}
+.vol-tag{font-size:10px;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace}
+.tag-pri1{background:rgba(240,96,96,.1);color:var(--red);border:.5px solid rgba(240,96,96,.25)}
+.tag-pri2{background:rgba(240,144,96,.1);color:var(--coral);border:.5px solid rgba(240,144,96,.25)}
+.tag-norm{background:var(--s2);color:var(--t3);border:.5px solid var(--b)}
+
+.rotation-box{background:var(--s1);border:.5px solid var(--b);border-radius:14px;padding:16px;margin-bottom:10px}
+.rotation-row{display:flex;gap:10px;padding:8px 0;border-bottom:.5px solid var(--b);font-size:13px;color:var(--t2)}
+.rotation-row:last-child{border-bottom:none}
+.rotation-week{font-family:'DM Mono',monospace;color:var(--ac);font-size:11px;min-width:70px;flex-shrink:0;margin-top:1px}
+
+.reset-link{text-align:center;font-size:11px;color:var(--t3);cursor:pointer;margin-top:16px;font-family:'DM Mono',monospace}
+.reset-link:hover{color:var(--t2)}
+
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- SCREEN 1: Recovery -->
+<div class="screen active" id="s1">
+  <div class="logo"><div class="dot"></div>Fit Lab — Split Builder</div>
+  <h1>Izberi <span>pravi split</span></h1>
+  <p class="sub">Za tiste ki trenirajo 2+ leti. Oceni svojo regeneracijo in šibke točke — sistem ti sestavi split ki je prilagojen tebi.</p>
+
+  <div class="card">
+    <div class="card-label">Korak 1 — Regeneracija</div>
+    <div class="seg">
+      <div class="seg-btn" onclick="pick('recovery','low',this)">
+        Nizka<br><span style="font-size:10px;opacity:.7">slab spanec, visok stres, dolgotrajna bolečina</span>
+      </div>
+      <div class="seg-btn" onclick="pick('recovery','high',this)">
+        Dobra<br><span style="font-size:10px;opacity:.7">7-9h spanja, kalorični surplus, konstantna izvedba</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-primary" onclick="goToStep2()" style="cursor:pointer;padding:14px;border-radius:10px;background:var(--ac);color:#0f0f0e;font-size:14px;font-weight:600;text-align:center">
+    Naprej →
+  </div>
+</div>
+
+<!-- SCREEN 2: Weak points -->
+<div class="screen" id="s2">
+  <div class="logo"><div class="dot"></div>Fit Lab — Split Builder</div>
+  <h1>Šibke <span>točke</span></h1>
+  <p class="sub">Oceni vsako mišično skupino od 1 do 5. Samo <strong style="color:var(--ac)">2 skupini</strong> lahko dobitta oceno 1 — to sta tvoji prioriteti.</p>
+
+  <div class="card">
+    <div class="card-label">Korak 2 — Oceni mišične skupine</div>
+    <div class="muscle-grid" id="muscle-grid"></div>
+  </div>
+
+  <div class="tip">
+    <strong>Kako oceniti:</strong> 1 = ta mišica najbolj zaostaja, 5 = tvoja moč. Primer: dobro razvite roke ampak šibke noge — noge dobijo 1–2, roke 4–5.
+  </div>
+
+  <button class="btn-primary" onclick="goToResult()">Pokaži moj split →</button>
+  <button class="btn-secondary" onclick="goTo('s1')">← Nazaj</button>
+</div>
+
+<!-- SCREEN 3: Result -->
+<div class="screen" id="s3">
+  <div class="logo"><div class="dot"></div>Fit Lab — Split Builder</div>
+  <h1>Tvoj <span id="r-name">split</span></h1>
+  <p class="sub" id="r-sub"></p>
+
+  <div class="split-header">
+    <div class="split-stats" id="r-stats"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:10px">
+    <div class="card-label">Tedenski razpored</div>
+    <div class="week-schedule" style="border:none;background:transparent" id="r-schedule"></div>
+  </div>
+
+  <div class="vol-table">
+    <div class="vol-header">
+      <span style="flex:1">Mišična skupina</span>
+      <span style="min-width:80px">Serije/trening</span>
+      <span style="min-width:60px">Status</span>
+    </div>
+    <div id="r-volume"></div>
+  </div>
+
+  <div class="rotation-box">
+    <div class="card-label" style="margin-bottom:10px">Rotacija prioritet</div>
+    <div id="r-rotation"></div>
+  </div>
+
+  <div class="tip" id="r-tip"></div>
+
+  <button class="btn-primary" onclick="reset()" style="background:var(--s2);color:var(--t2);border:.5px solid var(--b)">Sestavi nov split</button>
+  <div class="reset-link" onclick="reset()">Ponastavi</div>
+</div>
+
+</div>
+
+<script>
+const state = { recovery: null, scores: {} };
+
+const muscles = [
+  { key: 'chest', name: 'Prsa' },
+  { key: 'back', name: 'Hrbet' },
+  { key: 'shoulders', name: 'Ramena' },
+  { key: 'arms', name: 'Roke' },
+  { key: 'quads', name: 'Kvadricepsi' },
+  { key: 'hamGlutes', name: 'Hamstrings & zadnjica' },
+];
+
+function pick(key, val, el) {
+  state[key] = val;
+  el.closest('.seg').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function setScore(key, val) {
+  // Max 2 muscles can have score 1
+  if (val === 1) {
+    const ones = Object.entries(state.scores).filter(e => e[0] !== key && e[1] === 1);
+    if (ones.length >= 2) {
+      const row = document.querySelector(`[data-muscle="${key}"]`);
+      row.style.animation = 'shake 0.3s ease';
+      setTimeout(() => row.style.animation = '', 300);
+      return;
+    }
+  }
+  state.scores[key] = val;
+  renderMuscleRow(key);
+  updateBadges();
+}
+
+function renderMuscleRow(key) {
+  const row = document.querySelector(`[data-muscle="${key}"]`);
+  const val = state.scores[key] || 0;
+  row.querySelectorAll('.muscle-dot').forEach((dot, i) => {
+    dot.className = `muscle-dot dot-${i+1}`;
+    if (i < val) dot.classList.add('active');
+  });
+}
+
+function updateBadges() {
+  const sorted = Object.entries(state.scores).sort((a,b) => a[1] - b[1]);
+  muscles.forEach(m => {
+    const badge = document.querySelector(`[data-badge="${m.key}"]`);
+    if (!badge) return;
+    const score = state.scores[m.key];
+    if (!score) { badge.textContent = '—'; badge.className = 'muscle-badge'; return; }
+    
+    const rank = sorted.findIndex(e => e[0] === m.key);
+    if (score === 1 && rank === 0) { badge.textContent = 'šibka 1'; badge.className = 'muscle-badge pri1'; }
+    else if (score === 1 && rank === 1) { badge.textContent = 'šibka 2'; badge.className = 'muscle-badge pri2'; }
+    else { badge.textContent = score; badge.className = 'muscle-badge'; }
+  });
+}
+
+function renderMuscleGrid() {
+  const grid = document.getElementById('muscle-grid');
+  grid.innerHTML = muscles.map(m => `
+    <div class="muscle-row" data-muscle="${m.key}">
+      <div class="muscle-name">${m.name}</div>
+      <div class="muscle-dots">
+        ${[1,2,3,4,5].map(i => `<div class="muscle-dot dot-${i}" onclick="setScore('${m.key}',${i})">${i}</div>`).join('')}
+      </div>
+      <div class="muscle-badge" data-badge="${m.key}">—</div>
+    </div>
+  `).join('');
+  // Init defaults to 3
+  muscles.forEach(m => { if (!state.scores[m.key]) { state.scores[m.key] = 3; renderMuscleRow(m.key); } });
+  updateBadges();
+}
+
+function getTop2() {
+  return Object.entries(state.scores).sort((a,b) => a[1]-b[1]).slice(0,2).map(e => e[0]);
+}
+
+function goToStep2() {
+  if (!state.recovery) {
+    alert('Prosim izberi regeneracijo.');
+    return;
+  }
+  renderMuscleGrid();
+  goTo('s2');
+}
+
+// Split definitions per priority
+const splits = {
+  chest: {
+    name: 'Chest Priority PPL',
+    sub: 'Prsa dobijo prednost — treniraš jih prve in z največ serijami.',
+    days: [
+      { label: 'D1', name: 'Push A — chest fokus', desc: 'Prsa kot prva prioriteta', train: true },
+      { label: 'D2', name: 'Pull', desc: 'Hrbet, biceps', train: true },
+      { label: 'D3', name: 'Legs', desc: 'Noge', train: true },
+      { label: 'D4', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D5', name: 'Push B — chest fokus 2', desc: 'Prsa kot prva prioriteta', train: true },
+      { label: 'D6', name: 'Pull + Hamstrings', desc: 'Hrbet, zadnjica, hamstrings', train: true },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+    days_low: [
+      { label: 'D1', name: 'Push A — chest fokus', desc: 'Prsa kot prva prioriteta', train: true },
+      { label: 'D2', name: 'Pull', desc: 'Hrbet, biceps', train: true },
+      { label: 'D3', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D4', name: 'Legs', desc: 'Noge', train: true },
+      { label: 'D5', name: 'Push B — chest fokus 2', desc: 'Prsa kot prva prioriteta', train: true },
+      { label: 'D6', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+  },
+  shoulders: {
+    name: 'Shoulder Priority PPL',
+    sub: 'Ramena dobijo prednost — treniraš jih prve in z največ serijami.',
+    days: [
+      { label: 'D1', name: 'Push A — shoulder fokus', desc: 'Ramena kot prva prioriteta', train: true },
+      { label: 'D2', name: 'Pull', desc: 'Hrbet, biceps', train: true },
+      { label: 'D3', name: 'Legs + Shoulders', desc: 'Noge + ramena kot bonus', train: true },
+      { label: 'D4', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D5', name: 'Push B — shoulder fokus 2', desc: 'Ramena kot prva prioriteta', train: true },
+      { label: 'D6', name: 'Pull + Hamstrings', desc: 'Hrbet, zadnjica, hamstrings', train: true },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+    days_low: [
+      { label: 'D1', name: 'Push A — shoulder fokus', desc: 'Ramena kot prva prioriteta', train: true },
+      { label: 'D2', name: 'Pull', desc: 'Hrbet, biceps', train: true },
+      { label: 'D3', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D4', name: 'Legs + Shoulders', desc: 'Noge + ramena', train: true },
+      { label: 'D5', name: 'Push B — shoulder fokus 2', desc: 'Ramena kot prva prioriteta', train: true },
+      { label: 'D6', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+  },
+  back: {
+    name: 'Back Priority PPL',
+    sub: 'Hrbet dobi prednost — treniraš ga prvi in z največ serijami.',
+    days: [
+      { label: 'D1', name: 'Pull A — fokus lats', desc: 'Vertikalne vaje (lat pulldown, pull up)', train: true },
+      { label: 'D2', name: 'Push — chest fokus', desc: 'Prsa, ramena, triceps', train: true },
+      { label: 'D3', name: 'Legs', desc: 'Noge', train: true },
+      { label: 'D4', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D5', name: 'Pull B — fokus upper back', desc: 'Horizontalne vaje (T-bar row, machine row)', train: true },
+      { label: 'D6', name: 'Push + Upper Back + Hamstrings', desc: 'Shoulder fokus + zadnjica', train: true },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+    days_low: [
+      { label: 'D1', name: 'Pull A — fokus lats', desc: 'Vertikalne vaje (lat pulldown, pull up)', train: true },
+      { label: 'D2', name: 'Push', desc: 'Prsa, ramena, triceps', train: true },
+      { label: 'D3', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D4', name: 'Legs', desc: 'Noge', train: true },
+      { label: 'D5', name: 'Pull B — fokus upper back', desc: 'Horizontalne vaje (T-bar row, machine row)', train: true },
+      { label: 'D6', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+  },
+  arms: {
+    name: 'Arms Priority Split',
+    sub: 'Roke dobijo prednost — treniraš jih prve in z največ serijami.',
+    days: [
+      { label: 'D1', name: 'Shoulders + Arms', desc: 'Roke kot prva prioriteta', train: true },
+      { label: 'D2', name: 'Pull — back only', desc: 'Samo hrbet, brez izoliranih rok', train: true },
+      { label: 'D3', name: 'Arms + Legs', desc: 'Roke kot prva prioriteta + noge', train: true },
+      { label: 'D4', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D5', name: 'Push — chest fokus', desc: 'Prsa, ramena, triceps', train: true },
+      { label: 'D6', name: 'Back + Hamstrings + Arms', desc: 'Hrbet + zadnjica + roke', train: true },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+    days_low: [
+      { label: 'D1', name: 'Shoulders + Arms', desc: 'Roke kot prva prioriteta', train: true },
+      { label: 'D2', name: 'Pull — back only', desc: 'Samo hrbet, brez izoliranih rok', train: true },
+      { label: 'D3', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D4', name: 'Arms + Legs', desc: 'Roke + noge', train: true },
+      { label: 'D5', name: 'Push + Back + Hamstrings', desc: 'Compound trening', train: true },
+      { label: 'D6', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+  },
+  quads: {
+    name: 'Quad Priority Split',
+    sub: 'Kvadricepsi dobijo prednost — treniraš jih prve in z največ serijami.',
+    days: [
+      { label: 'D1', name: 'Legs A — quad bias', desc: 'Kvadricepsi kot prva prioriteta', train: true },
+      { label: 'D2', name: 'Push — chest fokus', desc: 'Prsa, ramena, triceps', train: true },
+      { label: 'D3', name: 'Pull', desc: 'Hrbet, biceps', train: true },
+      { label: 'D4', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D5', name: 'Legs B — quad fokus', desc: 'Kvadricepsi kot prva prioriteta', train: true },
+      { label: 'D6', name: 'Push + Quad work', desc: 'Shoulder fokus + quad izolacija', train: true },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+    days_low: [
+      { label: 'D1', name: 'Legs A — quad bias', desc: 'Kvadricepsi kot prva prioriteta', train: true },
+      { label: 'D2', name: 'Push', desc: 'Prsa, ramena, triceps', train: true },
+      { label: 'D3', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D4', name: 'Pull', desc: 'Hrbet, biceps', train: true },
+      { label: 'D5', name: 'Legs B — quad fokus', desc: 'Kvadricepsi kot prva prioriteta', train: true },
+      { label: 'D6', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+  },
+  hamGlutes: {
+    name: 'Hamstring/Glute Priority Split',
+    sub: 'Hamstrings in zadnjica dobijo prednost — treniraš jih prvi in z največ serijami.',
+    days: [
+      { label: 'D1', name: 'Legs A — hamstring bias', desc: 'Hamstrings & zadnjica kot prva prioriteta', train: true },
+      { label: 'D2', name: 'Push — chest fokus', desc: 'Prsa, ramena, triceps', train: true },
+      { label: 'D3', name: 'Pull', desc: 'Hrbet, biceps', train: true },
+      { label: 'D4', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D5', name: 'Legs B — hamstring fokus', desc: 'Hamstrings & zadnjica kot prva prioriteta', train: true },
+      { label: 'D6', name: 'Push + Ham isolation', desc: 'Shoulder fokus + hamstring izolacija', train: true },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+    days_low: [
+      { label: 'D1', name: 'Legs A — hamstring bias', desc: 'Hamstrings & zadnjica kot prva prioriteta', train: true },
+      { label: 'D2', name: 'Push', desc: 'Prsa, ramena, triceps', train: true },
+      { label: 'D3', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D4', name: 'Pull', desc: 'Hrbet, biceps', train: true },
+      { label: 'D5', name: 'Legs B — hamstring fokus', desc: 'Hamstrings & zadnjica kot prva prioriteta', train: true },
+      { label: 'D6', name: 'Počitek', desc: 'Regeneracija', train: false },
+      { label: 'D7', name: 'Počitek', desc: 'Regeneracija', train: false },
+    ],
+  },
+};
+
+const muscleNames = {
+  chest: 'Prsa', back: 'Hrbet', shoulders: 'Ramena',
+  arms: 'Roke', quads: 'Kvadricepsi', hamGlutes: 'Hamstrings & zadnjica'
+};
+
+// Weekly volume per muscle per split (approximate sets/week)
+function getVolume(priority, top2) {
+  return muscles.map(m => {
+    const isPri1 = m.key === top2[0];
+    const isPri2 = m.key === top2[1];
+    let sets, tag;
+    if (isPri1) { sets = '6–8 serij/trening'; tag = 'pri1'; }
+    else if (isPri2) { sets = '4–6 serij/trening'; tag = 'pri2'; }
+    else { sets = '2–4 serij/trening'; tag = 'norm'; }
+    return { ...m, sets, tag, isPri1, isPri2 };
+  });
+}
+
+function goToResult() {
+  const top2 = getTop2();
+  const priority = top2[0];
+  const split = splits[priority];
+  const isLow = state.recovery === 'low';
+  const days = isLow ? split.days_low : split.days;
+  const trainCount = days.filter(d => d.train).length;
+  const rotationType = isLow ? '2-on / 1-off' : '3-on / 1-off';
+
+  document.getElementById('r-name').textContent = split.name;
+  document.getElementById('r-sub').textContent = split.sub;
+
+  // Stats
+  document.getElementById('r-stats').innerHTML = `
+    <div class="sstat"><div class="sstat-num">${trainCount}</div><div class="sstat-label">treningi/teden</div></div>
+    <div class="sstat"><div class="sstat-num">${7 - trainCount}</div><div class="sstat-label">počitek</div></div>
+    <div class="sstat"><div class="sstat-num" style="font-size:13px">${rotationType}</div><div class="sstat-label">rotacija</div></div>
+  `;
+
+  // Schedule
+  document.getElementById('r-schedule').innerHTML = days.map(d => `
+    <div class="week-row">
+      <div class="week-day">${d.label}</div>
+      <div class="week-label">
+        <div class="week-name">${d.name}</div>
+        <div class="week-desc">${d.desc}</div>
+      </div>
+      <div class="week-badge ${d.train ? 'badge-train' : 'badge-rest'}">${d.train ? 'Trening' : 'Off'}</div>
+    </div>
+  `).join('');
+
+  // Volume
+  const vol = getVolume(priority, top2);
+  document.getElementById('r-volume').innerHTML = vol.map(m => `
+    <div class="vol-row">
+      <div class="vol-muscle">${m.name}</div>
+      <div class="vol-sets ${m.isPri1 ? 'weak' : m.isPri2 ? '' : 'strong'}" style="${m.isPri2 ? 'color:var(--coral)' : ''}">${m.sets}</div>
+      <div class="vol-tag tag-${m.tag}">${m.tag === 'pri1' ? '★ prioriteta 1' : m.tag === 'pri2' ? '◆ prioriteta 2' : 'ostalo'}</div>
+    </div>
+  `).join('');
+
+  // Rotation
+  document.getElementById('r-rotation').innerHTML = [
+    { w: 'Trajanje', d: 'Drži ta split 10–12 tednov brez sprememb.' },
+    { w: 'Nato', d: `Oceni napredek na šibkih točkah (${muscleNames[top2[0]]}, ${muscleNames[top2[1]]}). Rotiraj na naslednjo šibko točko.` },
+    { w: 'V 1 letu', d: '2–3 fokusirani bloki na leto = uravnotežena rast po celotnem telesu.' },
+  ].map(r => `
+    <div class="rotation-row">
+      <span class="rotation-week">${r.w}</span>
+      <span>${r.d}</span>
+    </div>
+  `).join('');
+
+  // Tip
+  document.getElementById('r-tip').innerHTML = `
+    <strong>💡 Ključno:</strong> Šibko točko treniraš <strong style="color:var(--txt)">vedno prvo</strong> v treningu — ko si svež in močan. Šele potem ostale mišične skupine.
+  `;
+
+  goTo('s3');
+}
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function reset() {
+  state.recovery = null;
+  state.scores = {};
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
+  goTo('s1');
+}
+</script>
+</body>
+</html>
