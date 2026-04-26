@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fit Lab — Tedenski check-in</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f0e;--s1:#1a1a18;--s2:#232320;--b:#2e2e2a;
+  --ac:#c8f060;--ac2:#60f0a8;--txt:#f0ede6;--t2:#b8b5a8;--t3:#888070;
+  --blue:#60c8f0;--coral:#f09060;--red:#f06060;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;padding:24px 16px 80px}
+.wrap{max-width:520px;margin:0 auto}
+.logo{font-family:'DM Mono',monospace;font-size:11px;color:var(--ac);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ac);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:24px;font-weight:500;margin-bottom:6px}
+h1 span{color:var(--ac)}
+.sub{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.5}
+
+.screen{display:none}
+.screen.active{display:block}
+
+/* Progress bar */
+.progress{display:flex;gap:4px;margin-bottom:20px}
+.progress-step{flex:1;height:3px;border-radius:2px;background:var(--b);transition:background .3s}
+.progress-step.done{background:var(--ac2)}
+.progress-step.active{background:var(--ac)}
+
+/* Card */
+.card{background:var(--s1);border:.5px solid var(--b);border-radius:14px;padding:18px;margin-bottom:10px}
+.card-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+.question{font-size:15px;font-weight:500;color:var(--txt);margin-bottom:14px;line-height:1.4}
+
+/* Input */
+input[type=number],input[type=text]{width:100%;background:var(--s2);border:.5px solid var(--b);border-radius:8px;padding:11px 14px;font-size:16px;font-family:'DM Sans',sans-serif;color:var(--txt);outline:none;transition:border-color .15s;-moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+input:focus{border-color:var(--ac)}
+.input-unit{position:relative}
+.input-unit input{padding-right:40px}
+.input-unit span{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none}
+
+/* Options */
+.options{display:flex;flex-direction:column;gap:8px}
+.option{padding:12px 14px;border-radius:10px;border:.5px solid var(--b);background:var(--s2);color:var(--t2);font-size:14px;cursor:pointer;transition:all .15s;user-select:none}
+.option:hover{border-color:var(--t3)}
+.option.selected{border-color:var(--ac);color:var(--ac);background:rgba(200,240,96,.08)}
+.option-row{display:flex;gap:8px}
+.option-row .option{flex:1;text-align:center}
+
+/* Slider */
+.slider-wrap{padding:4px 0}
+.slider-row{display:flex;align-items:center;gap:12px}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--b);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--ac);cursor:pointer}
+.slider-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--ac);min-width:28px;text-align:right}
+.slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-top:6px}
+
+/* Buttons */
+.btn-primary{width:100%;padding:14px;border-radius:10px;border:none;background:var(--ac);color:#0f0f0e;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;margin-top:4px}
+.btn-primary:hover{background:#d4f570}
+.btn-secondary{width:100%;padding:12px;border-radius:10px;border:.5px solid var(--b);background:transparent;color:var(--t2);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:8px}
+.err{background:rgba(240,96,96,.08);border:.5px solid rgba(240,96,96,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:10px;display:none}
+
+/* History strip */
+.hist-strip{display:flex;gap:5px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+.hist-week{flex-shrink:0;background:var(--s1);border:.5px solid var(--b);border-radius:8px;padding:8px 10px;text-align:center;min-width:54px}
+.hist-week.latest{border-color:var(--ac)}
+.hist-label{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;margin-bottom:4px}
+.hist-weight{font-size:13px;font-weight:500;color:var(--txt)}
+.hist-change{font-size:10px;margin-top:2px}
+.hist-change.down{color:var(--ac2)}
+.hist-change.up{color:var(--coral)}
+.hist-change.same{color:var(--t3)}
+
+/* Output */
+.result-card{background:var(--s1);border:.5px solid var(--b);border-radius:14px;overflow:hidden;margin-bottom:10px}
+.result-header{padding:16px 18px;background:rgba(200,240,96,.05);border-bottom:.5px solid var(--b)}
+.result-week{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.result-status{font-size:18px;font-weight:500;color:var(--ac)}
+
+.result-items{padding:14px 18px}
+.result-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:.5px solid var(--b)}
+.result-item:last-child{border-bottom:none}
+.result-icon{font-size:18px;flex-shrink:0;width:28px;text-align:center}
+.result-content{}
+.result-title{font-size:12px;color:var(--t3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.result-val{font-size:14px;font-weight:500;color:var(--txt)}
+.result-val.green{color:var(--ac)}
+.result-val.red{color:var(--red)}
+.result-val.blue{color:var(--blue)}
+.result-val.same{color:var(--t2)}
+
+.why-box{background:var(--s2);border-radius:10px;padding:12px 14px;margin:0 18px 14px;font-size:13px;color:var(--t2);line-height:1.6}
+.why-box strong{color:var(--txt)}
+
+.tip-box{background:rgba(200,240,96,.05);border:.5px solid rgba(200,240,96,.2);border-radius:10px;padding:12px 14px;margin:0 18px 14px;font-size:13px;color:var(--t2);line-height:1.6}
+.tip-box strong{color:var(--ac)}
+
+/* Stats */
+.stats-row{display:flex;gap:8px;margin-bottom:12px}
+.stat{flex:1;background:var(--s1);border:.5px solid var(--b);border-radius:10px;padding:12px;text-align:center}
+.stat-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--ac);line-height:1;margin-bottom:3px}
+.stat-label{font-size:10px;color:var(--t3)}
+
+.reset-link{text-align:center;font-size:11px;color:var(--t3);cursor:pointer;margin-top:20px;font-family:'DM Mono',monospace}
+.reset-link:hover{color:var(--t2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- SETUP -->
+<div class="screen active" id="screen-setup">
+  <div class="logo"><div class="dot"></div>Fit Lab — Check-in</div>
+  <h1>Tedenski <span>check-in</span></h1>
+  <p class="sub">Vsak teden vpiši podatke — sistem ti pove kaj prilagoditi.</p>
+
+  <div class="card">
+    <div class="card-label">Tvoj profil</div>
+    <div class="question">Kakšen je tvoj cilj?</div>
+    <div class="options">
+      <div class="option" onclick="pickSetup('goal','cut',this)">🔻 Hujšanje — hočem izgubiti maščobo</div>
+      <div class="option" onclick="pickSetup('goal','bulk',this)">🔼 Mišična masa — hočem pridobiti mišice</div>
+    </div>
+  </div>
+
+  <div class="card" id="setup-loss-card" style="display:none">
+    <div class="card-label">Ciljna izguba</div>
+    <div class="question">Koliko kg skupaj hočeš izgubiti?</div>
+    <div class="options">
+      <div class="option" onclick="pickSetup('lossGoal','small',this)">1–5 kg → idealen tempo 0.3–0.5 kg/teden</div>
+      <div class="option" onclick="pickSetup('lossGoal','medium',this)">5–15 kg → idealen tempo 0.5–0.75 kg/teden</div>
+      <div class="option" onclick="pickSetup('lossGoal','large',this)">15+ kg → idealen tempo 0.75–1 kg/teden</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Nivo izkušenj</div>
+    <div class="question">Kako dolgo že treniraš?</div>
+    <div class="options">
+      <div class="option" onclick="pickSetup('level','beginner',this)">Začetnik — manj kot 1 leto</div>
+      <div class="option" onclick="pickSetup('level','intermediate',this)">Vmesni — 1–3 leta</div>
+      <div class="option" onclick="pickSetup('level','advanced',this)">Napredni — 3+ leta</div>
+    </div>
+  </div>
+
+  <div class="err" id="setup-err">Prosim izpolni vse podatke.</div>
+  <button class="btn-primary" onclick="startCheckin()">Začni →</button>
+</div>
+
+<!-- CHECKIN -->
+<div class="screen" id="screen-checkin">
+  <div class="logo"><div class="dot"></div>Fit Lab — Check-in</div>
+  <h1>Teden <span id="week-num">1</span></h1>
+  <p class="sub" id="checkin-date"></p>
+
+  <div class="progress" id="progress-bar"></div>
+
+  <!-- Q1: Teža -->
+  <div class="card" id="q1">
+    <div class="card-label">1 / 5</div>
+    <div class="question">Koliko tehtaš danes? (zjutraj, na tešče)</div>
+    <div class="input-unit">
+      <input type="number" id="weight-input" placeholder="75.5" step="0.1" min="40" max="200">
+      <span>kg</span>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--t3)">💡 Meri zjutraj, po stranišču, preden ješ ali piješ</div>
+  </div>
+
+  <!-- Q3: Sledenje kalorijam -->
+  <div class="card" id="q3">
+    <div class="card-label" id="q3-label">2 / 6</div>
+    <div class="question">Kako si sledil kalorijam ta teden?</div>
+    <div class="options">
+      <div class="option" onclick="pickQ('tracking','perfect',this)">Vsak obrok, vsak dan</div>
+      <div class="option" onclick="pickQ('tracking','mostly',this)">Večinoma — kakšen obrok sem pozabil</div>
+      <div class="option" onclick="pickQ('tracking','weekends',this)">Med tednom da, vikende manj</div>
+      <div class="option" onclick="pickQ('tracking','no',this)">Nisem sledil</div>
+    </div>
+  </div>
+
+  <!-- Q4: Treningi -->
+  <div class="card" id="q4">
+    <div class="card-label" id="q4-label">3 / 6</div>
+    <div class="question">Kako so šli treningi ta teden?</div>
+    <div class="options">
+      <div class="option" onclick="pickQ('training','great',this)">Odlično — napredoval sem v teži ali ponovitvah</div>
+      <div class="option" onclick="pickQ('training','ok',this)">OK — normalno, brez napredka ampak brez padca</div>
+      <div class="option" onclick="pickQ('training','poor',this)">Slabo — moč je padla ali nisem zmogel vsega</div>
+      <div class="option" onclick="pickQ('training','missed',this)">Nisem treniral / preskočil trening</div>
+    </div>
+  </div>
+
+  <!-- Q5: Mišična bolečina -->
+  <div class="card" id="q5">
+    <div class="card-label" id="q5-label">4 / 6</div>
+    <div class="question">Si imel mišično bolečino (DOMS) ki te je ovirala pri naslednjem treningu?</div>
+    <div class="options">
+      <div class="option" onclick="pickQ('doms','no',this)">Ne — normalna utrujenost, nič posebnega</div>
+      <div class="option" onclick="pickQ('doms','mild',this)">Malo — čutil sem jo, ampak me ni ovirala</div>
+      <div class="option" onclick="pickQ('doms','severe',this)">Da — ovirala me je pri naslednjem treningu</div>
+    </div>
+  </div>
+
+  <!-- Q6: Spanje -->
+  <div class="card" id="q6">
+    <div class="card-label" id="q6-label">5 / 6</div>
+    <div class="question">Koliko ur si povprečno spal ta teden?</div>
+    <div class="options">
+      <div class="option" onclick="pickQ('sleep','poor',this)">Manj kot 6h</div>
+      <div class="option" onclick="pickQ('sleep','ok',this)">6–7h — ni idealno</div>
+      <div class="option" onclick="pickQ('sleep','good',this)">7–8h — dobro</div>
+      <div class="option" onclick="pickQ('sleep','great',this)">8h+ — odlično</div>
+    </div>
+  </div>
+
+  <!-- Q7: Energija -->
+  <div class="card" id="q7">
+    <div class="card-label" id="q7-label">6 / 6</div>
+    <div class="question">Kako bi ocenil svojo energijo ta teden?</div>
+    <div class="slider-wrap">
+      <div class="slider-row">
+        <input type="range" min="1" max="10" value="7" step="1" id="energy-slider" oninput="document.getElementById('energy-val').textContent=this.value">
+        <span class="slider-val" id="energy-val">7</span>
+      </div>
+      <div class="slider-labels"><span>Izčrpan</span><span>Odličen</span></div>
+    </div>
+  </div>
+
+  <div class="err" id="checkin-err">Prosim odgovori na vsa vprašanja.</div>
+  <button class="btn-primary" onclick="calculateResult()">Pokaži rezultat →</button>
+  <button class="btn-secondary" onclick="goBack()">← Nazaj</button>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="logo"><div class="dot"></div>Fit Lab — Check-in</div>
+  <h1>Tvoj <span>rezultat</span></h1>
+
+  <!-- History -->
+  <div class="hist-strip" id="hist-strip"></div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="stats-row"></div>
+
+  <!-- Result card -->
+  <div class="result-card">
+    <div class="result-header">
+      <div class="result-week" id="result-week"></div>
+      <div class="result-status" id="result-status"></div>
+    </div>
+    <div class="result-items" id="result-items"></div>
+    <div class="why-box" id="why-box"></div>
+    <div class="tip-box" id="tip-box"></div>
+  </div>
+
+  <button class="btn-primary" onclick="newCheckin()">Nov check-in naslednji teden →</button>
+  <div class="reset-link" onclick="resetAll()">Ponastavi vse podatke</div>
+</div>
+
+</div>
+
+<script>
+const setup = { goal: null, lossGoal: null, level: null };
+const answers = { tracking: null, training: null, doms: null, sleep: null };
+
+function pickSetup(key, val, el) {
+  setup[key] = val;
+  el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+
+  if (key === 'goal') {
+    document.getElementById('setup-loss-card').style.display = val === 'cut' ? 'block' : 'none';
+    if (val !== 'cut') setup.lossGoal = null;
+  }
+}
+
+function pickQ(key, val, el) {
+  answers[key] = val;
+  el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function getHistory() {
+  return JSON.parse(localStorage.getItem('fitlab_checkin_history') || '[]');
+}
+
+function saveHistory(entry) {
+  const history = getHistory();
+  history.push(entry);
+  localStorage.setItem('fitlab_checkin_history', JSON.stringify(history));
+}
+
+function saveSetup() {
+  localStorage.setItem('fitlab_checkin_setup', JSON.stringify(setup));
+}
+
+function loadSetup() {
+  const saved = localStorage.getItem('fitlab_checkin_setup');
+  if (saved) Object.assign(setup, JSON.parse(saved));
+}
+
+function startCheckin() {
+  if (!setup.goal || !setup.level || (setup.goal === 'cut' && !setup.lossGoal)) {
+    document.getElementById('setup-err').style.display = 'block';
+    return;
+  }
+  document.getElementById('setup-err').style.display = 'none';
+  saveSetup();
+
+  const history = getHistory();
+  const weekNum = history.length + 1;
+  document.getElementById('week-num').textContent = weekNum;
+
+  const now = new Date();
+  document.getElementById('checkin-date').textContent =
+    `${now.getDate()}. ${['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'][now.getMonth()]} ${now.getFullYear()}`;
+
+  // Update labels
+  document.getElementById('q3-label').textContent = '1 / 5';
+  document.getElementById('q4-label').textContent = '2 / 5';
+  document.getElementById('q5-label').textContent = '3 / 5';
+  document.getElementById('q6-label').textContent = '4 / 5';
+  document.getElementById('q7-label').textContent = '5 / 5';
+
+  // Progress bar
+  const steps = 5;
+  const pb = document.getElementById('progress-bar');
+  pb.innerHTML = Array.from({length: steps}, (_, i) =>
+    `<div class="progress-step ${i === 0 ? 'active' : ''}"></div>`
+  ).join('');
+
+  showScreen('screen-checkin');
+}
+
+function getIdealTempo() {
+  const goal = setup.goal === 'cut' ? setup.lossGoal : null;
+  if (!goal) return null;
+  if (goal === 'small') return { min: 0.3, max: 0.5 };
+  if (goal === 'medium') return { min: 0.5, max: 0.75 };
+  return { min: 0.75, max: 1.0 };
+}
+
+function getBulkIdealTempo() {
+  if (setup.level === 'beginner') return { min: 0.25, max: 0.5 };
+  if (setup.level === 'intermediate') return { min: 0.15, max: 0.25 };
+  return { min: 0.1, max: 0.15 };
+}
+
+function calculateResult() {
+  const weight = parseFloat(document.getElementById('weight-input').value);
+  const energy = parseInt(document.getElementById('energy-slider').value);
+
+  if (!weight || !answers.tracking || !answers.training || !answers.doms || !answers.sleep) {
+    document.getElementById('checkin-err').style.display = 'block';
+    return;
+  }
+  document.getElementById('checkin-err').style.display = 'none';
+
+  const history = getHistory();
+  const weekNum = history.length + 1;
+  const lastWeek = history.length > 0 ? history[history.length - 1] : null;
+  const twoWeeksAgo = history.length > 1 ? history[history.length - 2] : null;
+
+  // Calculate weight change
+  const weightChange = lastWeek ? Math.round((weight - lastWeek.weight) * 100) / 100 : null;
+  const stagnated2weeks = lastWeek && twoWeeksAgo ?
+    Math.abs(weight - twoWeeksAgo.weight) < 0.3 : false;
+  const stagnated3weeks = history.length > 2 ?
+    Math.abs(weight - history[history.length - 3].weight) < 0.4 : false;
+
+  // Build result
+  let kcalChange = '=';
+  let kcalColor = 'same';
+  let trainingChange = 'Nadaljuj normalno';
+  let trainingColor = 'same';
+  let focus = '';
+  let why = '';
+  let tip = '';
+
+  // SLEEP PRIORITY
+  if (answers.sleep === 'poor') {
+    kcalChange = '= pusti kot je';
+    trainingChange = 'Nadaljuj normalno — mogoče boš imel manj moči';
+    focus = '😴 Spanje — to je prioriteta ta teden';
+    why = 'Slab spanec pomeni slabša regeneracija, manj moči na treningu in višji kortizol. Ta teden se fokusiraj na spanje — vse ostalo pride za tem.';
+    tip = '💡 Ne spreminjaj ničesar dokler ni spanje urejeno. Brez tega ostalo nima smisla.';
+  }
+
+  // TRACKING ISSUES
+  else if (answers.tracking === 'no' || answers.tracking === 'weekends') {
+    kcalChange = '= najprej konsistenca';
+    trainingChange = 'Nadaljuj normalno';
+    focus = answers.tracking === 'no' ? '📊 Začni slediti kalorijam' : '📊 Vikendi so problem';
+    why = answers.tracking === 'no'
+      ? 'Brez sledenja ne veš ali si sploh v deficitu. Teden dni sledi vsak obrok — šele potem ima smisel prilagajati.'
+      : 'Vikendi ti uničijo deficit ali surplus za cel teden. En "prosti" dan lahko izbriše 3-4 dni dela.';
+    tip = '💡 Najprej dosledno sledi, potem prilagajamo. Brez tega je vsaka sprememba ugibanje.';
+  }
+
+  // DOMS - volume reduction
+  else if (answers.doms === 'severe') {
+    kcalChange = '= pusti kot je';
+    trainingChange = '⬇️ Zmanjšaj volumen za ~20%';
+    trainingColor = 'red';
+    focus = '💪 Regeneracija — telo potrebuje več časa';
+    why = 'Če bolečina ovira naslednji trening, je to znak da telo rabi več časa. Zmanjšaj volumen za teden ali dva in poglej kako se odzove.';
+    tip = '💡 Manj z boljšo izvedbo je vedno boljše od več z utrujenimi mišicami.';
+  }
+
+  // CUT LOGIC
+  else if (setup.goal === 'cut') {
+    const tempo = getIdealTempo();
+
+    if (!lastWeek) {
+      // First week
+      kcalChange = '= prvi teden, opazujemo';
+      trainingChange = 'Nadaljuj normalno';
+      focus = '📊 Vzpostavljamo baseline';
+      why = 'To je tvoj prvi check-in — še nimamo s čim primerjati. Naslednji teden bomo že videli trend.';
+      tip = '💡 Ta teden sledi kalorijam dosledno — brez tega ne moremo nič prilagajati.';
+    }
+    else if (stagnated2weeks && answers.tracking === 'perfect') {
+      // Stagnation despite perfect tracking
+      kcalChange = '⬇️ -150 do -200 kcal ali dodaj kardio';
+      kcalColor = 'red';
+      trainingChange = 'Nadaljuj normalno';
+      focus = '🔻 Zmanjšaj kalorije ali dodaj kardio';
+      why = `Teža stoji 2 tedna in slediš dosledno — deficit ni zadosten. Izberi kar ti bolj ustreza: zmanjšaj za 150-200 kcal ali dodaj 2-3x kardio po 10-15 minut na teden.`;
+      tip = '💡 Obe opciji sta enako učinkoviti — izberi tisto ki ti je bolj vzdrževano dolgoročno.';
+    }
+    else if (stagnated2weeks && answers.tracking === 'mostly') {
+      kcalChange = '= najprej konsistenca';
+      trainingChange = 'Nadaljuj normalno';
+      focus = '📊 Izboljšaj sledenje';
+      why = 'Teža stoji, ampak ne slediš dosledno. Preden karkoli spremenimo — en teden sledi vsak obrok. Pogosto je samo to dovolj.';
+      tip = '💡 Večina ljudi podceni kalorije za 20-30%. Tehtaj hrano en teden — verjetno se boš presenetil.';
+    }
+    else if (weightChange !== null && weightChange < -tempo.max) {
+      // Too fast loss
+      kcalChange = '⬆️ +150 kcal';
+      kcalColor = 'green';
+      trainingChange = 'Nadaljuj normalno — ohrani moč';
+      focus = '⚡ Prehitra izguba — dodaj kalorije';
+      why = `Izgubil si ${Math.abs(weightChange)} kg ta teden — malce preveč. Pri tako hitri izgubi tvegaš mišice. Dodaj 150 kcal in pazi da moč na treningu ne pade.`;
+      tip = '💡 Cilj je izgubiti maščobo, ne mišice. Počasneje = boljše dolgoročno.';
+    }
+    else if (weightChange !== null && weightChange >= -tempo.max && weightChange <= -tempo.min) {
+      // Perfect pace
+      kcalChange = '= idealno, nadaljuj';
+      kcalColor = 'green';
+      trainingChange = answers.training === 'great' ? '⬆️ Povečaj intenzivnost' : 'Nadaljuj normalno';
+      focus = '✅ Vse je na pravi poti';
+      why = `Izgubil si ${Math.abs(weightChange)} kg — točno tam kjer moraš biti. Nadaljuj brez sprememb.`;
+      tip = '💡 Ne dotikaj se tega kar deluje.';
+    }
+    else if (answers.training === 'poor') {
+      kcalChange = '= pusti kot je';
+      trainingChange = '⬇️ Zmanjšaj težo, fokus na formo';
+      trainingColor = 'red';
+      focus = '🏋️ Trening — zmanjšaj težo';
+      why = 'Padec v moči je signal da telo ni pripravljeno. Zmanjšaj težo in se fokusiraj na tehniko — ne sili skozi slabe treninge.';
+      tip = '💡 Boljša forma z manj teže = manj poškodb, boljši napredek.';
+    }
+    else {
+      kcalChange = '= nadaljuj kot je';
+      trainingChange = 'Nadaljuj normalno';
+      focus = '📊 Nadaljuj in opazuj trend';
+      why = 'En teden je premalo za zaključke. Nadaljuj in poglej trend čez 2-3 tedne.';
+      tip = '💡 Teža niha vsak dan — to je normalno. Gledaj trend čez tedne, ne posamezne dni.';
+    }
+  }
+
+  // BULK LOGIC
+  else if (setup.goal === 'bulk') {
+    const tempo = getBulkIdealTempo();
+
+    if (!lastWeek) {
+      kcalChange = '= prvi teden, opazujemo';
+      trainingChange = 'Nadaljuj normalno';
+      focus = '📊 Vzpostavljamo baseline';
+      why = 'To je tvoj prvi check-in. Naslednji teden že vidimo trend.';
+      tip = '💡 Ta teden sledi kalorijam dosledno.';
+    }
+    else if (stagnated2weeks) {
+      kcalChange = '⬆️ +150 kcal';
+      kcalColor = 'green';
+      trainingChange = 'Nadaljuj normalno';
+      focus = '🔼 Dodaj kalorije — teža ne raste';
+      why = 'Teža stoji 2 tedna — surplus ni dovolj. Dodaj 150 kcal in poglej naslednji teden.';
+      tip = '💡 +150 kcal je dovolj za začetek. Ne dodajaj preveč naenkrat.';
+    }
+    else if (stagnated3weeks && answers.training !== 'great') {
+      kcalChange = '= pusti kot je';
+      trainingChange = '⬇️ Zmanjšaj volumen — možen overreaching';
+      trainingColor = 'red';
+      focus = '💪 Zmanjšaj volumen treninga';
+      why = 'Več kot 3 tedne brez napredka v moči pomeni da telo ne more slediti volumnu. Zmanjšaj za teden ali dva — moč se bo vrnila.';
+      tip = '💡 Deload ni korak nazaj. Po njem se moč pogosto vrne višja kot prej.';
+    }
+    else if (weightChange !== null && weightChange > tempo.max) {
+      kcalChange = '⬇️ -150 kcal';
+      kcalColor = 'red';
+      trainingChange = 'Nadaljuj normalno';
+      focus = '⚖️ Prehiter gain — zmanjšaj kalorije';
+      why = `Pridobil si ${weightChange} kg ta teden — malo preveč. Prehiter bulk pomeni več maščobe kot mišic. Zmanjšaj za 150 kcal.`;
+      tip = '💡 Počasnejši bulk = manj maščobe, več mišic. Ni treba hiteti.';
+    }
+    else if (weightChange !== null && weightChange >= tempo.min && weightChange <= tempo.max) {
+      kcalChange = '= idealno, nadaljuj';
+      kcalColor = 'green';
+      trainingChange = answers.training === 'great' ? '⬆️ Povečaj intenzivnost' : 'Nadaljuj normalno';
+      focus = '✅ Vse je na pravi poti';
+      why = `Pridobil si ${weightChange} kg — točno pravi tempo za tvoj nivo. Nadaljuj brez sprememb.`;
+      tip = '💡 Ne dotikaj se tega kar deluje.';
+    }
+    else if (answers.training === 'great') {
+      kcalChange = '= nadaljuj kot je';
+      trainingChange = '⬆️ Povečaj intenzivnost ali težo';
+      trainingColor = 'green';
+      focus = '🔥 Odličen teden — potisni naprej';
+      why = 'Napredek na treningu je najboljši znak da gre vse prav. Ko dosežeš zgornjo mejo ponovitev — dvigni težo.';
+      tip = '💡 Double progression: najprej do zgornje meje ponovitev, potem povečaj težo.';
+    }
+    else {
+      kcalChange = '= nadaljuj kot je';
+      trainingChange = 'Nadaljuj normalno';
+      focus = '📊 Nadaljuj in opazuj trend';
+      why = 'En teden je premalo za zaključke. Nadaljuj in opazuj trend.';
+      tip = '💡 Gledaj trend čez 2-3 tedne, ne vsak teden posebej.';
+    }
+  }
+
+
+
+  // Save to history
+  const entry = {
+    week: weekNum,
+    date: new Date().toLocaleDateString('sl-SI'),
+    weight,
+    energy,
+    tracking: answers.tracking,
+    training: answers.training,
+    sleep: answers.sleep,
+    doms: answers.doms,
+    result: { kcalChange, trainingChange, focus }
+  };
+  saveHistory(entry);
+
+  // Render result screen
+  renderResult(entry, weightChange, kcalChange, kcalColor, trainingChange, trainingColor, focus, why, tip, weekNum);
+  showScreen('screen-result');
+}
+
+function renderResult(entry, weightChange, kcalChange, kcalColor, trainingChange, trainingColor, focus, why, tip, weekNum) {
+  const history = getHistory();
+
+  // History strip
+  const strip = document.getElementById('hist-strip');
+  strip.innerHTML = history.slice(-8).map((h, i, arr) => {
+    const prev = i > 0 ? arr[i-1].weight : null;
+    const change = prev ? Math.round((h.weight - prev) * 100) / 100 : null;
+    const changeClass = change === null ? '' : change < 0 ? 'down' : change > 0 ? 'up' : 'same';
+    const changeText = change === null ? '—' : change < 0 ? `${change} kg` : change > 0 ? `+${change} kg` : '= isto';
+    const isLatest = i === arr.length - 1;
+    return `<div class="hist-week ${isLatest ? 'latest' : ''}">
+      <div class="hist-label">T${h.week}</div>
+      <div class="hist-weight">${h.weight} kg</div>
+      <div class="hist-change ${changeClass}">${changeText}</div>
+    </div>`;
+  }).join('');
+
+  // Stats
+  const totalChange = history.length > 1 ? Math.round((history[history.length-1].weight - history[0].weight) * 100) / 100 : 0;
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat"><div class="stat-num">${weekNum}</div><div class="stat-label">tednov</div></div>
+    <div class="stat"><div class="stat-num" style="color:${totalChange < 0 ? 'var(--ac2)' : totalChange > 0 ? 'var(--coral)' : 'var(--t2)'}">${totalChange > 0 ? '+' : ''}${totalChange} kg</div><div class="stat-label">skupaj</div></div>
+    <div class="stat"><div class="stat-num">${entry.weight}</div><div class="stat-label">kg zdaj</div></div>
+  `;
+
+  // Result header
+  document.getElementById('result-week').textContent = `Teden ${weekNum} — ${entry.date}`;
+  document.getElementById('result-status').textContent = focus;
+
+  // Result items
+  document.getElementById('result-items').innerHTML = `
+    <div class="result-item">
+      <div class="result-icon">🍽️</div>
+      <div class="result-content">
+        <div class="result-title">Kalorije</div>
+        <div class="result-val ${kcalColor}">${kcalChange}</div>
+      </div>
+    </div>
+    <div class="result-item">
+      <div class="result-icon">🏋️</div>
+      <div class="result-content">
+        <div class="result-title">Trening</div>
+        <div class="result-val ${trainingColor}">${trainingChange}</div>
+      </div>
+    </div>
+    <div class="result-item">
+      <div class="result-icon">⚡</div>
+      <div class="result-content">
+        <div class="result-title">Energija ta teden</div>
+        <div class="result-val">${entry.energy}/10</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('why-box').innerHTML = `<strong>Zakaj:</strong> ${why}`;
+  document.getElementById('tip-box').innerHTML = `${tip}`;
+}
+
+function newCheckin() {
+  // Reset answers
+  Object.keys(answers).forEach(k => answers[k] = null);
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('weight-input').value = '';
+  document.getElementById('energy-slider').value = 7;
+  document.getElementById('energy-val').textContent = '7';
+  document.getElementById('checkin-err').style.display = 'none';
+  startCheckin();
+}
+
+function goBack() {
+  showScreen('screen-setup');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function resetAll() {
+  if (confirm('Izbrisati vse podatke? Zgodovina check-inov bo izgubljena.')) {
+    localStorage.removeItem('fitlab_checkin_history');
+    localStorage.removeItem('fitlab_checkin_setup');
+    location.reload();
+  }
+}
+
+// Init
+loadSetup();
+</script>
+</body>
+</html>
